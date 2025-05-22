@@ -5,7 +5,14 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      transitionProperty: {
+        'dropdown': 'opacity, transform'
+      },
+      transitionDuration: {
+        '200': '200ms'
+      }
+    },
   },
   plugins: [],
 }

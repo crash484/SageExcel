@@ -7,7 +7,7 @@ import { MongoClient, ServerApiVersion } from "mongodb";
 
 const router = express.Router();
 dotenv.config();
-
+const key=process.env.SECRET_KEY;
 
 
 
@@ -21,11 +21,11 @@ router.post('/register',async (req,res)=>{
     const user = new User({ username, password: hashed, isAdmin }); //creating new object to store in db
     const result = await user.save();
 
-    if (result) return res.status(201).json({ message: 'User registered' });
-    else return res.status(403).json({ message: 'unable to register user'})
+    if (result)  res.status(201).json({ message: 'User registered' });
+    else  return res.status(403).json({ message: 'unable to register user'})
     } catch (err) {
     console.error('Error saving user:', err);
-    return res.status(500).json({ error: err.message });
+     res.status(500).json({ error: err.message });
   }
 });
 
@@ -35,19 +35,29 @@ router.post('/register',async (req,res)=>{
       const {username,password}=req.body;
       const user = await User.findOne({username});
       if( !user  ) {
-        return res.status( 401 ).json( { message : "user doesnt exist" } );
+         res.status( 401 ).json( { message : "user doesnt exist" } );
+         //refresh the page
+         return;
       }
 
       //comparing the password
       const isMatch= await bcrypt.compare(password,user.password);
-      if( !isMatch ) return res.status(401).json( { message: 'Invalid password' } );
-      else return res.status(201).json( { message: "successfully logged in" } ); //will redirect to home page if true
-
+      if( !isMatch ) {
+         res.status(401).json( { message: 'Invalid password' } );
+         //refresh the page
+         return;
+        } else  {
+          res.status(201).json( { message: "successfully logged in" } ); 
+          // //jwt is created after verifying the user credentials are correct
+          jwt.sign(user,key,{expiresIn:'1h'},(err,token)=>{
+            if(err) console.log(err);
+            res.send()
+          })
+      }
     } catch (err) {
-      console.error("Error unable to find user");
-      return res.status(500).json({ error: err.message });
+        console.error("Error unable to find user");
+        res.status(500).json({ error: err.message });
     }
   })
 
-  //implement the jwt here
 export default router;

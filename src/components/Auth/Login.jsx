@@ -14,6 +14,10 @@ export default function Login() {
     const navigate = useNavigate()
 
     const { email, password } = formData
+    //url param so as to bypass preflight request
+    const url = new URLSearchParams();
+    url.append("email",formData.email);
+    url.append("password",formData.password);
 
     const handleChange = (e) => {
         setFormData((prev) => ({
@@ -28,10 +32,10 @@ export default function Login() {
 
         try {
             // Replace with actual API call
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch('http://localhost:5000/api/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: url.toString()
             })
 
             const data = await response.json()

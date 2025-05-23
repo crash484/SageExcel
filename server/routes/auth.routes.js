@@ -40,6 +40,7 @@ router.post('/register',async (req,res)=>{
     try{
       const {email,password}=req.body;
       const user = await User.findOne({email});
+
       if( !user  ) {
          res.status( 401 ).json( { message : "user doesnt exist" } );
          //refresh the page
@@ -47,22 +48,27 @@ router.post('/register',async (req,res)=>{
 
       //comparing the password
       const isMatch= await bcrypt.compare(password,user.password);
+
       if( !isMatch ) {
          res.status(401).json( { message: 'Invalid password' } );
          //refresh the page
          return;
-        } else  {
-          res.status(201).json( { message: "successfully logged in" } ); 
+
+        } else {
+
           // //jwt is created after verifying the user credentials are correct
-          jwt.sign(user,key,{expiresIn:'1h'},(err,token)=>{
+          jwt.sign(user.toJSON(),key,{expiresIn:'1h'},(err,token)=>{
+
             if(err) console.log(err);
             //need to send token
+            console.log(token);
+            res.status(201).json({token,message:"successfully logged in"});
             return;
           })
       }
     } catch (err) {
-        console.error("Error unable to find user");
-        res.status(500).json({ error: err.message });
+      console.error(err);  
+      res.status(500).json({ error: err.message });
     }
   })
 

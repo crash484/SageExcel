@@ -41,6 +41,7 @@ export default function Login() {
             const data = await response.json()
 
             if (response.ok) {
+                console.log(data.token);
                 dispatch(setCredentials(data))
                 navigate('/dashboard')
                 toast.success('Login successful!')

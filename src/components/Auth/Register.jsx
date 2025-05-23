@@ -16,6 +16,11 @@ export default function Register() {
     const navigate = useNavigate()
 
     const { name, email, password, confirmPassword } = formData
+    //url param to send data in the string in simple request format
+    const url = new URLSearchParams();
+    url.append("name",formData.name);
+    url.append("email",formData.email);
+    url.append("password",formData.password);
 
     const handleChange = (e) => {
         setFormData((prev) => ({
@@ -36,10 +41,10 @@ export default function Register() {
 
         try {
             // Replace with actual API call
-            const response = await fetch('/api/auth/register', {
+            const response = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password })
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: url.toString()
             })
 
             const data = await response.json()

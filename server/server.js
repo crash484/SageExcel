@@ -12,7 +12,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: 'http://localhost:5173', // frontend origin allowed
-  credentials: true // if you use cookies or authentication headers
+  credentials: true, // if you use cookies or authentication headers
+  allowedHeaders: ['Content-Type', 'Authorization'],
+
 }));
 app.use("/api/auth",authRoutes);
 

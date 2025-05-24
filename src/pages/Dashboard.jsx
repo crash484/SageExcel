@@ -1,6 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { selectCurrentToken } from '../store/authSlice';
+import { useSelector } from 'react-redux'
 
-const Dashboard = () => {
+
+const Dashboard =  () => {
+    const  token  = useSelector((state) => state.auth.token)
+    //this makes so that it will always verify the token once when the page is loaded at first
+    useEffect(()=>{
+        (async () => {
+            try {
+            // Your async code here
+                const response = await fetch('http://localhost:5000/api/auth/verify', {
+                    method: 'POST',
+                    headers:{
+                    'Content-Type': 'application/json',
+                    'Authorization':`Bearer ${token}`
+                    }
+                })
+                const data = await response.json()     
+                console.log('Verification result:', data);
+            } catch (error) {
+                console.error(error);
+            }
+        })();
+    },[])
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">

@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import User from "../models/user.model.js"
+import { verifyToken } from "../middleware/auth.middleware.js"
 
 const router = express.Router();
 dotenv.config();
@@ -61,7 +62,6 @@ router.post('/register',async (req,res)=>{
 
             if(err) console.log(err);
             //need to send token
-            console.log(token);
             res.status(201).json({token,message:"successfully logged in"});
             return;
           })
@@ -72,6 +72,8 @@ router.post('/register',async (req,res)=>{
     }
   })
 
-  
+  router.post('/verify',verifyToken,(req,res)=>{ 
+    res.json({message:"user is verified"})
+  })
   
 export default router;

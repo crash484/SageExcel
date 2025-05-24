@@ -1,23 +1,15 @@
 import React, { useEffect } from 'react';
 import { selectCurrentToken } from '../store/authSlice';
 import { useSelector } from 'react-redux'
-
+import SendRequest from '../../src/api/SendRequest';
 
 const Dashboard =  () => {
-    const  token  = useSelector((state) => state.auth.token)
+    const  token  = useSelector(selectCurrentToken)
     //this makes so that it will always verify the token once when the page is loaded at first
     useEffect(()=>{
         (async () => {
             try {
-            // Your async code here
-                const response = await fetch('http://localhost:5000/api/auth/verify', {
-                    method: 'POST',
-                    headers:{
-                    'Content-Type': 'application/json',
-                    'Authorization':`Bearer ${token}`
-                    }
-                })
-                const data = await response.json()     
+                const data = await SendRequest(token);
                 console.log('Verification result:', data);
             } catch (error) {
                 console.error(error);

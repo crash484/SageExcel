@@ -5,4 +5,7 @@ export default defineConfig({
     plugins: [react({
         jsxRuntime: 'automatic'
     })],
+    optimizeDeps: {
+        include: ['react-icons/fi']
+    }
 })

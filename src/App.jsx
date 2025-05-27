@@ -15,7 +15,7 @@ function App() {
     const { token } = useSelector((state) => state.auth)
 
     // DEVELOPMENT SETTING - SET TO false WHEN READY FOR AUTH
-    const DEV_BYPASS_AUTH = false
+    const DEV_BYPASS_AUTH = true
 
     return (
         <BrowserRouter>

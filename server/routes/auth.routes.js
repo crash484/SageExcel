@@ -112,8 +112,16 @@ router.post('/register',async (req,res)=>{
   })
 
   //get method to get user 
-  router.get("/getUser",async (req,res)=>{
-
+  router.get("/getUser",verifyToken,async (req,res)=>{
+    try{
+      const userEmail = req.user.email;
+      const user = await User.findOne({ email: userEmail });
+      console.log(user)
+      return res.status(200).json({ user: user })
+    }catch(err){
+      console.log(err)
+      return res.status(500).json({message: "server error" })
+    }
   })
   
 export default router;

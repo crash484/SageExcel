@@ -1,21 +1,37 @@
-import React, { useEffect } from 'react';
-import { selectCurrentToken } from '../store/authSlice';
+import React, { useEffect, useState } from 'react';
+import { selectCurrentToken,selectCurrentUser } from '../store/authSlice';
 import { useSelector } from 'react-redux'
 import SendRequest from '../../src/api/SendRequest';
 
 const Profile = () => {
+    const [profile,SetProfile] = useState({
+        email:"",
+        name:""
+    });
     const  token  = useSelector(selectCurrentToken)
+
     //this makes so that it will always verify the token once when the page is loaded at first
     useEffect(()=>{
         (async () => {
             try {
-                const data = await SendRequest(token);
-                console.log('Verification result:', data);
-            } catch (error) {
+                const response = await fetch('http://localhost:5000/api/auth/getUser',{
+                    method:'GET',
+                    headers:{
+                        'Authorization':`Bearer ${token}`
+                    }
+                });
+                const data = await response.json()
+                SetProfile({
+                    email: data.user.email,
+                    name: data.user.name
+                });
+                } catch (error) {
                 console.error(error);
+                toast.error('Session expired. Please login again.');
             }
         })();
-    },[])
+    },[token])
+
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Your Profile</h2>
@@ -26,11 +42,11 @@ const Profile = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">John Doe</p>
+                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profile.name}</p>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">john@example.com</p>
+                            <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{profile.email}</p>
                         </div>
                     </div>
                 </div>

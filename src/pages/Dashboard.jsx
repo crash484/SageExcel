@@ -15,7 +15,7 @@ const Dashboard =  () => {
                 console.error(error);
             }
         })();
-    },[])
+    },[token])
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">

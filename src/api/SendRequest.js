@@ -10,7 +10,7 @@ const SendRequest = async (token)=>{
                     }
                 })
                 const data = await response.json()     
-                return data;
+                return data.message;
             } catch (error) {
                 console.error(error);
                 throw error;

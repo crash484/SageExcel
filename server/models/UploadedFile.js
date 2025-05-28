@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Upload from "../../src/pages/Upload";
 
 const uploadedFileSchema = new mongoose.Schema({
     filename: {
@@ -18,6 +17,9 @@ const uploadedFileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    uploadedBy: {
+        type: mongoose.Schema.Types.ObjectId, ref: "User"
+    }
 })
 
 const UploadedFile = mongoose.model('UploadedFile',uploadedFileSchema);

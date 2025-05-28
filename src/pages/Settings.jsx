@@ -12,10 +12,11 @@ export default function Settings() {
                     const data = await SendRequest(token);
                     console.log('Verification result:', data);
                 } catch (error) {
+                    toast.error('Session expired. Please login again.');
                     console.error(error);
                 }
             })();
-        },[])
+        },[token])
     return (
         <div>
             <h1>Settings Page</h1>

@@ -5,9 +5,10 @@ import * as XLSX from 'xlsx';
 import { FiUpload, FiX, FiFile, FiCheckCircle } from 'react-icons/fi';
 import { selectCurrentToken } from '../store/authSlice';
 import { useSelector } from 'react-redux';
+import SendRequest from '../api/SendRequest';
 
 // Development mode configuration
-const DEV_MODE = true;
+const DEV_MODE = false;
 const DEV_MODE_UPLOAD_DELAY = 1500; // ms
 const DEV_MODE_PROGRESS_INTERVAL = 100; // ms
 const PREVIEW_ROW_COUNT = 5;
@@ -27,6 +28,7 @@ export default function Upload() {
             const verifyToken = async () => {
                 try {
                     const data = await SendRequest(token);
+                    console.log("verification result ",data);
                     setIsTokenValid(true);
                 } catch (error) {
                     setIsTokenValid(false);
@@ -38,7 +40,7 @@ export default function Upload() {
     }, [token]);
 
     const onDrop = useCallback((acceptedFiles) => {
-        if (!DEV_MODE && !isTokenValid) {
+        if (!isTokenValid) {
             toast.error('Please login to upload files');
             return;
         }
@@ -105,7 +107,7 @@ export default function Upload() {
     };
 
     const handleUpload = async () => {
-        if (!DEV_MODE && !isTokenValid) {
+        if (!isTokenValid) {
             toast.error('Session expired. Please login again.');
             return;
         }
@@ -134,7 +136,7 @@ export default function Upload() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('/api/upload', {
+            const response = await fetch('http://localhost:5000/api/auth/upload', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -159,7 +161,7 @@ export default function Upload() {
         }
     };
 
-    if (!DEV_MODE && !isTokenValid) {
+    if (!isTokenValid) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                 <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">

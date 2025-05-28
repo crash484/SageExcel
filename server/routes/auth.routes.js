@@ -4,10 +4,15 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import User from "../models/user.model.js"
 import { verifyToken } from "../middleware/auth.middleware.js"
+import multer from "multer"
+import UploadedFile from "../models/UploadedFile.js"
 
 const router = express.Router();
 dotenv.config();
 const key=process.env.SECRET_KEY;
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 
 
@@ -57,11 +62,11 @@ router.post('/register',async (req,res)=>{
 
         } else {
 
-          // //jwt is created after verifying the user credentials are correct
+          //jwt is created after verifying the user credentials are correct
           jwt.sign(user.toJSON(),key,{expiresIn:'1h'},(err,token)=>{
 
             if(err) console.log(err);
-            //need to send token
+
             res.status(201).json({token,message:"successfully logged in"});
             return;
           })
@@ -70,10 +75,45 @@ router.post('/register',async (req,res)=>{
       console.error(err);  
       res.status(500).json({ error: err.message });
     }
-  })
+  });
 
   router.post('/verify',verifyToken,(req,res)=>{ 
     res.json({message:"user is verified"})
+  });
+
+  //method to upload the file
+  router.post("/upload",verifyToken,upload.single('file'),async(req,res)=>{
+    try{
+      if(!req.file) return res.status(400).json({ message: 'No file Uploaded' });
+
+      const userEmail = req.user.email;
+      const user = await User.findOne({ email: userEmail });
+
+      if(!user) return res.status(404).json({ message: "user doesnt exist" });
+
+      console.log(user._id)
+
+      const fileDoc = await UploadedFile.create({
+        filename: req.file.originalname,
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+        uploadedBy: user._id,
+        size: req.file.size
+      })
+
+      user.uploadedFiles.push(fileDoc._id);
+      await user.save();
+
+      res.status(200).json({ message: 'File uploaded successfully', fileId: fileDoc._id });
+    } catch(err) {
+      console.error('upload error: ',err);
+      res.status(500).json({ message: "server error" })
+    }
+  })
+
+  //get method to get user 
+  router.get("/getUser",async (req,res)=>{
+
   })
   
 export default router;

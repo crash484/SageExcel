@@ -6,7 +6,7 @@ import { FiDownload, FiTrash2, FiEye, FiClock, FiFile } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 
 // Development mode flag - set to false when deploying to production
-const DEV_MODE = true;
+const DEV_MODE = false;
 
 export default function History() {
     const token = useSelector(selectCurrentToken);

@@ -13,9 +13,11 @@ const Profile = () => {
                 console.log('Verification result:', data);
             } catch (error) {
                 console.error(error);
+                toast.error('Session expired. Please login again.');
             }
         })();
-    },[])
+    },[token])
+
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Your Profile</h2>

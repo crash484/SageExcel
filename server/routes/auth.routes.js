@@ -122,7 +122,7 @@ router.post('/register',async (req,res)=>{
     }
   })
 
-  //method to get all files of a user and return user with all the files
+  //path to get all files of a user and return user with all the files
   router.get("/getFiles",verifyToken,async (req,res)=>{
     try{
       const user = await User.findOne({ email: req.user.email }).populate('uploadedFiles')
@@ -130,7 +130,7 @@ router.post('/register',async (req,res)=>{
       if(!user){
         return res.status(404).json({ message: 'user not found' })
       }
-      
+
       return res.status(200).json({ user })
     }
     catch(err){

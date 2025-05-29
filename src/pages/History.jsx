@@ -149,6 +149,25 @@ export default function History() {
         // } catch (error) {
         //     toast.error('Deletion failed');
         // }
+
+        try{
+            const response = await fetch(`http://localhost:5000/api/auth/delete/${fileId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`
+                },
+            });
+            const data = await response.json();
+            
+            if(response.ok){
+                toast.success('file Deleted');
+                setUploads((prev)=> prev.filter((file)=> file._id !== fileId));
+            }else{
+                toast.error(data.message || 'deletion failed');
+            }
+        }catch (error) {
+            toast.error('An error occurred while deleting');
+        }
     };
 
     const formatDate = (dateString) => {

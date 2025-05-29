@@ -36,8 +36,8 @@ router.post('/register',async (req,res)=>{
       return res.status(403).json({ message: 'unable to register user'})
     }
     } catch (err) {
-    console.error('Error saving user:', err);
-    res.status(500).json({ error: err.message });
+
+      res.status(500).json({ error: err.message });
   }
 });
 
@@ -72,7 +72,7 @@ router.post('/register',async (req,res)=>{
           })
       }
     } catch (err) {
-      console.error(err);  
+
       res.status(500).json({ error: err.message });
     }
   });
@@ -81,7 +81,7 @@ router.post('/register',async (req,res)=>{
     res.json({message:"user is verified"})
   });
 
-  //method to upload the file
+  //route to upload the file
   router.post("/upload",verifyToken,upload.single('file'),async(req,res)=>{
     try{
       if(!req.file) return res.status(400).json({ message: 'No file Uploaded' });
@@ -91,7 +91,6 @@ router.post('/register',async (req,res)=>{
 
       if(!user) return res.status(404).json({ message: "user doesnt exist" });
 
-      console.log(user._id)
 
       const fileDoc = await UploadedFile.create({
         filename: req.file.originalname,
@@ -140,7 +139,7 @@ router.post('/register',async (req,res)=>{
   })
 
   //route for downloading
-  router.get('/download/:id',async (req,res)=>{
+  router.get('/download/:id',verifyToken,async (req,res)=>{
     try{
       const file = await UploadedFile.findById(req.params.id);
       if(!file) return res.status(404).send('file not found');
@@ -149,7 +148,7 @@ router.post('/register',async (req,res)=>{
         'Content-Type': file.contentType,
         'Content-Disposition': `attachment; filename="${file.filename}"`,
       });
-      console.log("sending data")
+
       res.send(file.data);
     }catch (err) {
     console.error(err);
@@ -158,6 +157,25 @@ router.post('/register',async (req,res)=>{
   })
 
 
-  //route for uploading
+  //route for deleting the file
+  router.delete('/delete/:id',verifyToken,async (req,res)=>{
+    try{
+      const file = await UploadedFile.findById(req.params.id);
+      if(!file) return res.status(404).send('file not found')
+
+      await UploadedFile.deleteOne({_id: file._id});
+
+       // Remove reference from user
+      await User.findOneAndUpdate(
+        { email: req.user.email },
+        { $pull: { uploadedFiles: file._id } }
+      );
+      res.status(200).json({ message: 'File deleted successfully' });
+
+    }catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+  })
   
 export default router;

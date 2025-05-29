@@ -231,7 +231,7 @@ export default function History() {
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex justify-end space-x-3">
                                                     <button
-                                                        onClick={() => handleDownload(upload.id)}
+                                                        onClick={() => handleDownload(upload._id)}
                                                         className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors duration-200"
                                                         title="Download"
                                                     >
@@ -245,7 +245,7 @@ export default function History() {
                                                         <FiEye className="h-5 w-5" />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(upload.id)}
+                                                        onClick={() => handleDelete(upload._id)}
                                                         className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
                                                         title="Delete"
                                                     >

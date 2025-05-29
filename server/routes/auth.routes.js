@@ -138,5 +138,26 @@ router.post('/register',async (req,res)=>{
       return res.status(500).json({ message: 'server error' })
     }
   })
+
+  //route for downloading
+  router.get('/download/:id',async (req,res)=>{
+    try{
+      const file = await UploadedFile.findById(req.params.id);
+      if(!file) return res.status(404).send('file not found');
+
+      res.set({
+        'Content-Type': file.contentType,
+        'Content-Disposition': `attachment; filename="${file.filename}"`,
+      });
+      console.log("sending data")
+      res.send(file.data);
+    }catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+  })
+
+
+  //route for uploading
   
 export default router;

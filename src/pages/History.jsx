@@ -89,7 +89,7 @@ export default function History() {
         fetchData();
     }, [token]);
 
-    const handleDownload = async (fileId) => {
+    const handleDownload = async (fileId,fileName) => {
         if (DEV_MODE) {
             // DEVELOPMENT: Simulate download
             toast.success(`[DEV] Would download file ${fileId}`);
@@ -105,6 +105,31 @@ export default function History() {
         // } catch (error) {
         //     toast.error('Download failed');
         // }
+        try{
+            const response =  await fetch(`http://localhost:5000/api/auth/download/${fileId}`,{
+                method : 'GET',
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if(!response.ok) throw new Error('File download Failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'download'
+            document.body.appendChild(a);
+            a.click()
+            a.remove()
+            window.URL.revokeObjectURL(url);
+        }catch(err){
+            console.error(err);
+            toast.error('Download Failed')
+        }
+
     };
 
     const handleDelete = async (fileId) => {
@@ -230,8 +255,9 @@ export default function History() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex justify-end space-x-3">
+                                                    {/*this button is for downloading  */}
                                                     <button
-                                                        onClick={() => handleDownload(upload._id)}
+                                                        onClick={() => handleDownload(upload._id,upload.filename)}
                                                         className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors duration-200"
                                                         title="Download"
                                                     >
@@ -244,8 +270,9 @@ export default function History() {
                                                     >
                                                         <FiEye className="h-5 w-5" />
                                                     </button>
+                                                    {/*this button is for deleting  */}
                                                     <button
-                                                        onClick={() => handleDelete(upload._id)}
+                                                        onClick={() => handleDelete(upload._id,upload.filename)}
                                                         className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
                                                         title="Delete"
                                                     >

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, Outlet } from 'react-router-dom';
+import { NavLink, useNavigate, Outlet } from 'react-router-dom'; // Changed from Link to NavLink
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { toast } from 'react-hot-toast';
@@ -31,6 +31,12 @@ const DashboardLayout = () => {
         navigate('/login');
     };
 
+    // NavLink active class function
+    const navLinkClass = ({ isActive }) =>
+        isActive
+            ? 'border-indigo-500 dark:border-indigo-400 text-gray-900 dark:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
+            : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium';
+
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
             {/* Navigation */}
@@ -42,24 +48,24 @@ const DashboardLayout = () => {
                                 <h1 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">SageExcel</h1>
                             </div>
                             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                                <Link
+                                <NavLink
                                     to="/dashboard"
-                                    className="border-indigo-500 dark:border-indigo-400 text-gray-900 dark:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                    className={navLinkClass}
                                 >
                                     Dashboard
-                                </Link>
-                                <Link
+                                </NavLink>
+                                <NavLink
                                     to="/upload"
-                                    className="border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                    className={navLinkClass}
                                 >
                                     Upload
-                                </Link>
-                                <Link
+                                </NavLink>
+                                <NavLink
                                     to="/history"
-                                    className="border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                    className={navLinkClass}
                                 >
                                     History
-                                </Link>
+                                </NavLink>
                             </div>
                         </div>
 
@@ -83,20 +89,24 @@ const DashboardLayout = () => {
                                 {/* Dropdown menu */}
                                 {isDropdownOpen && (
                                     <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                                        <Link
+                                        <NavLink
                                             to="/profile"
-                                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                            className={({ isActive }) =>
+                                                `block px-4 py-2 text-sm ${isActive ? 'bg-gray-100 dark:bg-gray-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'}`
+                                            }
                                             onClick={() => setIsDropdownOpen(false)}
                                         >
                                             Your Profile
-                                        </Link>
-                                        <Link
+                                        </NavLink>
+                                        <NavLink
                                             to="/settings"
-                                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                            className={({ isActive }) =>
+                                                `block px-4 py-2 text-sm ${isActive ? 'bg-gray-100 dark:bg-gray-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'}`
+                                            }
                                             onClick={() => setIsDropdownOpen(false)}
                                         >
                                             Settings
-                                        </Link>
+                                        </NavLink>
                                         <button
                                             onClick={handleLogout}
                                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"

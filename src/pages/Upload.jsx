@@ -28,7 +28,7 @@ export default function Upload() {
             const verifyToken = async () => {
                 try {
                     const data = await SendRequest(token);
-                    console.log("verification result ",data);
+                    console.log("verification result ", data);
                     setIsTokenValid(true);
                 } catch (error) {
                     setIsTokenValid(false);

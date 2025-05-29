@@ -114,13 +114,28 @@ router.post('/register',async (req,res)=>{
   //get method to get user 
   router.get("/getUser",verifyToken,async (req,res)=>{
     try{
-      const userEmail = req.user.email;
-      const user = await User.findOne({ email: userEmail });
-      console.log(user)
+      const user = await User.findOne({ email: req.user.email });
       return res.status(200).json({ user: user })
     }catch(err){
       console.log(err)
       return res.status(500).json({message: "server error" })
+    }
+  })
+
+  //method to get all files of a user and return user with all the files
+  router.get("/getFiles",verifyToken,async (req,res)=>{
+    try{
+      const user = await User.findOne({ email: req.user.email }).populate('uploadedFiles')
+
+      if(!user){
+        return res.status(404).json({ message: 'user not found' })
+      }
+      
+      return res.status(200).json({ user })
+    }
+    catch(err){
+      console.error(err);
+      return res.status(500).json({ message: 'server error' })
     }
   })
   

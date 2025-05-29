@@ -161,7 +161,7 @@ export default function Upload() {
         }
     };
 
-    if (!isTokenValid) {
+    if (!DEV_MODE && !isTokenValid) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                 <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">

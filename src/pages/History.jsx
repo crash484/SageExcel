@@ -66,6 +66,18 @@ export default function History() {
                     // const response = await SendRequest(token, '/api/uploads/history');
                     // setUploads(response.data);
                     // setIsLoading(false);
+                    const response = await fetch('http://localhost:5000/api/auth/getFiles',{
+                        headers:{
+                            'Authorization':`Bearer ${token}`
+                        }
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        const user = data.user;
+                        const files = user.uploadedFiles;
+                        setUploads(files);
+                        setIsLoading(false)
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -179,7 +191,7 @@ export default function History() {
                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 {uploads.length > 0 ? (
                                     uploads.map((upload) => (
-                                        <tr key={upload.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                        <tr key={upload._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <FiFile className="flex-shrink-0 h-5 w-5 text-gray-400 dark:text-gray-300" />

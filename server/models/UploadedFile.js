@@ -19,6 +19,14 @@ const uploadedFileSchema = new mongoose.Schema({
     },
     uploadedBy: {
         type: mongoose.Schema.Types.ObjectId, ref: "User"
+    },
+    contentType: {
+        type: String,
+        required: true
+    },
+    data: {
+        type: Buffer,
+        required: true
     }
 })
 

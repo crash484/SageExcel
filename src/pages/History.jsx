@@ -62,10 +62,19 @@ export default function History() {
                         setIsLoading(false);
                     }, 800);
                 } else {
-                    // PRODUCTION: Actual API call
-                    // const response = await SendRequest(token, '/api/uploads/history');
-                    // setUploads(response.data);
-                    // setIsLoading(false);
+                    
+                    const response = await fetch('http://localhost:5000/api/auth/getFiles',{
+                        headers:{
+                            'Authorization':`Bearer ${token}`
+                        }
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        const user = data.user;
+                        const files = user.uploadedFiles;
+                        setUploads(files);
+                        setIsLoading(false)
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -77,7 +86,7 @@ export default function History() {
         fetchData();
     }, [token]);
 
-    const handleDownload = async (fileId) => {
+    const handleDownload = async (fileId,fileName) => {
         if (DEV_MODE) {
             // DEVELOPMENT: Simulate download
             toast.success(`[DEV] Would download file ${fileId}`);
@@ -85,14 +94,32 @@ export default function History() {
             return;
         }
 
-        // PRODUCTION: Actual download implementation
-        // try {
-        //     const response = await SendRequest(token, `/api/uploads/${fileId}/download`);
-        //     // Handle file download...
-        //     toast.success('Download started');
-        // } catch (error) {
-        //     toast.error('Download failed');
-        // }
+        
+        try{
+            const response =  await fetch(`http://localhost:5000/api/auth/download/${fileId}`,{
+                method : 'GET',
+                headers:{
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if(!response.ok) throw new Error('File download Failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName || 'download'
+            document.body.appendChild(a);
+            a.click()
+            a.remove()
+            window.URL.revokeObjectURL(url);
+        }catch(err){
+            console.error(err);
+            toast.error('Download Failed')
+        }
+
     };
 
     const handleDelete = async (fileId) => {
@@ -104,14 +131,26 @@ export default function History() {
             return;
         }
 
-        // PRODUCTION: Actual deletion
-        // try {
-        //     await SendRequest(token, `/api/uploads/${fileId}`, 'DELETE');
-        //     setUploads(uploads.filter(upload => upload.id !== fileId));
-        //     toast.success('File deleted');
-        // } catch (error) {
-        //     toast.error('Deletion failed');
-        // }
+      
+
+        try{
+            const response = await fetch(`http://localhost:5000/api/auth/delete/${fileId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`
+                },
+            });
+            const data = await response.json();
+            
+            if(response.ok){
+                toast.success('file Deleted');
+                setUploads((prev)=> prev.filter((file)=> file._id !== fileId));
+            }else{
+                toast.error(data.message || 'deletion failed');
+            }
+        }catch (error) {
+            toast.error('An error occurred while deleting');
+        }
     };
 
     const formatDate = (dateString) => {
@@ -179,7 +218,7 @@ export default function History() {
                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 {uploads.length > 0 ? (
                                     uploads.map((upload) => (
-                                        <tr key={upload.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                        <tr key={upload._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <FiFile className="flex-shrink-0 h-5 w-5 text-gray-400 dark:text-gray-300" />
@@ -218,13 +257,15 @@ export default function History() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex justify-end space-x-3">
+                                                    {/*this button is for downloading  */}
                                                     <button
-                                                        onClick={() => handleDownload(upload.id)}
+                                                        onClick={() => handleDownload(upload._id,upload.filename)}
                                                         className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors duration-200"
                                                         title="Download"
                                                     >
                                                         <FiDownload className="h-5 w-5" />
                                                     </button>
+                                                    {/*this button is for viewing  */}
                                                     <button
                                                         onClick={() => toast.success('[DEV] Preview would open here')}
                                                         className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
@@ -232,8 +273,9 @@ export default function History() {
                                                     >
                                                         <FiEye className="h-5 w-5" />
                                                     </button>
+                                                    {/*this button is for deleting  */}
                                                     <button
-                                                        onClick={() => handleDelete(upload.id)}
+                                                        onClick={() => handleDelete(upload._id)}
                                                         className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
                                                         title="Delete"
                                                     >

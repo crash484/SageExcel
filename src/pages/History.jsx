@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import SendRequest from '../../src/api/SendRequest';
 import { FiDownload, FiTrash2, FiEye, FiClock, FiFile } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import * as XLSX from "xlsx";
 
 // Development mode flag - set to false when deploying to production
 const DEV_MODE = false;
@@ -13,6 +14,8 @@ export default function History() {
     const [uploads, setUploads] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(DEV_MODE ? true : false); // Bypass auth in dev mode
+    const [previewData, setPreviewData] = useState("");
+
 
     // Mock data for development
     const mockData = [
@@ -86,6 +89,7 @@ export default function History() {
         fetchData();
     }, [token]);
 
+    //method for handling downlaod
     const handleDownload = async (fileId,fileName) => {
         if (DEV_MODE) {
             // DEVELOPMENT: Simulate download
@@ -122,6 +126,7 @@ export default function History() {
 
     };
 
+    //method for handling delete of the file
     const handleDelete = async (fileId) => {
         if (DEV_MODE) {
             // DEVELOPMENT: Simulate deletion
@@ -162,6 +167,30 @@ export default function History() {
             minute: '2-digit'
         });
     };
+    
+    //method for handling veiw
+    const handleView = async(fileId)=>{
+        try{
+                const url = `http://localhost:5000/api/auth/download/${fileId}`
+                const response = await fetch(url,{
+                    headers:{
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const arrayBuffer = await response.arrayBuffer();
+
+                const workbook = XLSX.read(arrayBuffer,{sheetRows:20});
+                //get first worksheet
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                //generate and display html
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); // 2D array of rows
+                setPreviewData(jsonData);
+            }catch(err){
+                console.log(err)
+                toast.error("unable to generate table")
+            }
+
+    }
 
     // Skip token check in development
     if (!DEV_MODE && !isTokenValid) {
@@ -267,7 +296,9 @@ export default function History() {
                                                     </button>
                                                     {/*this button is for viewing  */}
                                                     <button
-                                                        onClick={() => toast.success('[DEV] Preview would open here')}
+                                                        onClick={() =>{ 
+                                                            handleView(upload._id);
+                                                        }}
                                                         className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
                                                         title="Preview"
                                                     >
@@ -294,6 +325,42 @@ export default function History() {
                                 )}
                             </tbody>
                         </table>
+                        {previewData.length > 0 && (
+                            <div className="mt-8 p-4 rounded-lg bg-white dark:bg-gray-800 shadow">
+                                <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Excel Preview</h2>
+                                <div className="overflow-auto">
+                                    <table className="min-w-full table-auto border border-gray-300">
+                                        <thead className="bg-gray-100 dark:bg-gray-700">
+                                            <tr>
+                                                {previewData[0].map((header, index) => (
+                                                    <th
+                                                        key={index}
+                                                        className="px-4 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-300 border"
+                                                    >
+                                                        {header}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {previewData.slice(1).map((row, rowIndex) => (
+                                                <tr key={rowIndex} className="border-t">
+                                                    {row.map((cell, cellIndex) => (
+                                                        <td
+                                                            key={cellIndex}
+                                                            className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 border"
+                                                        >
+                                                            {cell}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 )}
             </div>

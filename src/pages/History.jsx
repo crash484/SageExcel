@@ -14,7 +14,7 @@ export default function History() {
     const [uploads, setUploads] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(DEV_MODE ? true : false); // Bypass auth in dev mode
-    const [previewHTML, setPreviewHTML] = useState("");
+    const [previewData, setPreviewData] = useState("");
 
 
     // Mock data for development
@@ -183,8 +183,8 @@ export default function History() {
                 //get first worksheet
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 //generate and display html
-                const table = XLSX.utils.sheet_to_html(worksheet);
-                setPreviewHTML(table);
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); // 2D array of rows
+                setPreviewData(jsonData);
             }catch(err){
                 console.log(err)
                 toast.error("unable to generate table")
@@ -325,15 +325,42 @@ export default function History() {
                                 )}
                             </tbody>
                         </table>
-                        {previewHTML && (
-                                <div className="mt-8 p-4 border rounded bg-white dark:bg-gray-800">
-                                        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Excel Preview</h2>
-                                    <div
-                                        className="overflow-auto text-sm text-gray-800 dark:text-gray-100"
-                                        dangerouslySetInnerHTML={{ __html: previewHTML }}
-                                    />
+                        {previewData.length > 0 && (
+                            <div className="mt-8 p-4 rounded-lg bg-white dark:bg-gray-800 shadow">
+                                <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Excel Preview</h2>
+                                <div className="overflow-auto">
+                                    <table className="min-w-full table-auto border border-gray-300">
+                                        <thead className="bg-gray-100 dark:bg-gray-700">
+                                            <tr>
+                                                {previewData[0].map((header, index) => (
+                                                    <th
+                                                        key={index}
+                                                        className="px-4 py-2 text-left text-sm font-medium text-gray-600 dark:text-gray-300 border"
+                                                    >
+                                                        {header}
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {previewData.slice(1).map((row, rowIndex) => (
+                                                <tr key={rowIndex} className="border-t">
+                                                    {row.map((cell, cellIndex) => (
+                                                        <td
+                                                            key={cellIndex}
+                                                            className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 border"
+                                                        >
+                                                            {cell}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            )}
+                            </div>
+                        )}
+
                     </div>
                 )}
             </div>

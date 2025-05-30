@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import SendRequest from '../../src/api/SendRequest';
 import { FiDownload, FiTrash2, FiEye, FiClock, FiFile } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import * as XLSX from "xlsx";
 
 // Development mode flag - set to false when deploying to production
 const DEV_MODE = false;
@@ -13,6 +14,8 @@ export default function History() {
     const [uploads, setUploads] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(DEV_MODE ? true : false); // Bypass auth in dev mode
+    const [previewHTML, setPreviewHTML] = useState("");
+
 
     // Mock data for development
     const mockData = [
@@ -86,6 +89,7 @@ export default function History() {
         fetchData();
     }, [token]);
 
+    //method for handling downlaod
     const handleDownload = async (fileId,fileName) => {
         if (DEV_MODE) {
             // DEVELOPMENT: Simulate download
@@ -122,6 +126,7 @@ export default function History() {
 
     };
 
+    //method for handling delete of the file
     const handleDelete = async (fileId) => {
         if (DEV_MODE) {
             // DEVELOPMENT: Simulate deletion
@@ -162,6 +167,30 @@ export default function History() {
             minute: '2-digit'
         });
     };
+    
+    //method for handling veiw
+    const handleView = async(fileId)=>{
+        try{
+                const url = `http://localhost:5000/api/auth/download/${fileId}`
+                const response = await fetch(url,{
+                    headers:{
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const arrayBuffer = await response.arrayBuffer();
+
+                const workbook = XLSX.read(arrayBuffer,{sheetRows:20});
+                //get first worksheet
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                //generate and display html
+                const table = XLSX.utils.sheet_to_html(worksheet);
+                setPreviewHTML(table);
+            }catch(err){
+                console.log(err)
+                toast.error("unable to generate table")
+            }
+
+    }
 
     // Skip token check in development
     if (!DEV_MODE && !isTokenValid) {
@@ -267,7 +296,9 @@ export default function History() {
                                                     </button>
                                                     {/*this button is for viewing  */}
                                                     <button
-                                                        onClick={() => toast.success('[DEV] Preview would open here')}
+                                                        onClick={() =>{ 
+                                                            handleView(upload._id);
+                                                        }}
                                                         className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
                                                         title="Preview"
                                                     >
@@ -294,6 +325,15 @@ export default function History() {
                                 )}
                             </tbody>
                         </table>
+                        {previewHTML && (
+                                <div className="mt-8 p-4 border rounded bg-white dark:bg-gray-800">
+                                        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Excel Preview</h2>
+                                    <div
+                                        className="overflow-auto text-sm text-gray-800 dark:text-gray-100"
+                                        dangerouslySetInnerHTML={{ __html: previewHTML }}
+                                    />
+                                </div>
+                            )}
                     </div>
                 )}
             </div>

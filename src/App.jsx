@@ -9,6 +9,7 @@ import Upload from './pages/Upload';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import Visualize from './pages/Visualize';
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="upload" element={<Upload />} />
+                    <Route path="/visualize" element={<Visualize />} />
                     <Route path="history" element={<History />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />

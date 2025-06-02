@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-hot-toast';
 import * as XLSX from 'xlsx';
@@ -14,6 +15,7 @@ const DEV_MODE_PROGRESS_INTERVAL = 100; // ms
 const PREVIEW_ROW_COUNT = 5;
 
 export default function Upload() {
+    const navigate = useNavigate();
     const token = useSelector(selectCurrentToken);
     const [file, setFile] = useState(null);
     const [headers, setHeaders] = useState([]);
@@ -96,14 +98,24 @@ export default function Upload() {
                 setTimeout(() => {
                     setIsLoading(false);
                     setUploadProgress(0);
-                    toast.success('File upload simulated successfully!');
-                    setFile(null);
-                    setHeaders([]);
-                    setPreviewData([]);
+
+                    // Prepare mock data for visualization
+                    const visualizationData = {
+                        headers: headers,
+                        data: previewData.map(row => {
+                            const obj = {};
+                            headers.forEach((header, i) => {
+                                obj[header] = row[i];
+                            });
+                            return obj;
+                        })
+                    };
+
+                    navigate('/visualize', { state: { uploadedData: visualizationData } });
                 }, 300);
             }
             setUploadProgress(progress);
-        }, DEV_MODE_PROGRESS_INTERVAL);
+        }, 100);
     };
 
     const handleUpload = async () => {
@@ -315,7 +327,8 @@ export default function Upload() {
                             <button
                                 onClick={handleUpload}
                                 disabled={isLoading || !file}
-                                className={`w-full mt-4 flex justify-center items-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none ${isLoading || !file ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                className={`w-full mt-4 flex justify-center items-center py-3 px-4 rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none ${isLoading || !file ? 'opacity-70 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 {isLoading ? (
                                     <>

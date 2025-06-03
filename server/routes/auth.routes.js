@@ -178,5 +178,21 @@ router.post('/register',async (req,res)=>{
   }
   })
   
-  //route to get one file 
+  //route to get one file
+  router.get('/preview/:id', verifyToken, async (req, res) => {
+  try {
+    const file = await UploadedFile.findById(req.params.id);
+    if (!file) return res.status(404).send('File not found');
+
+    res.set({
+      'Content-Type': file.contentType,
+    });
+
+    res.send(file.data); // buffer or binary data
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
 export default router;

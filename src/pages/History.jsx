@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { selectCurrentToken } from '../store/authSlice';
 import { useSelector } from 'react-redux';
 import SendRequest from '../../src/api/SendRequest';
@@ -10,6 +11,7 @@ import * as XLSX from "xlsx";
 const DEV_MODE = false;
 
 export default function History() {
+    const navigate = useNavigate();
     const token = useSelector(selectCurrentToken);
     const [uploads, setUploads] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -170,26 +172,8 @@ export default function History() {
     
     //method for handling veiw
     const handleView = async(fileId)=>{
-        try{
-                const url = `http://localhost:5000/api/auth/download/${fileId}`
-                const response = await fetch(url,{
-                    headers:{
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                const arrayBuffer = await response.arrayBuffer();
-
-                const workbook = XLSX.read(arrayBuffer,{sheetRows:20});
-                //get first worksheet
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                //generate and display html
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); // 2D array of rows
-                setPreviewData(jsonData);
-            }catch(err){
-                console.log(err)
-                toast.error("unable to generate table")
-            }
-
+        console.log(fileId);
+        navigate('/visualize',{state:{id:fileId,token:token}});
     }
 
     // Skip token check in development
@@ -299,8 +283,9 @@ export default function History() {
                                                         onClick={() =>{ 
                                                             handleView(upload._id);
                                                         }}
-                                                        className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
-                                                        title="Preview"
+                                                        o
+                                                        className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-blue-400 transition-all duration-200 ease-in-out"
+                                                        title="Visualize"
                                                     >
                                                         <FiEye className="h-5 w-5" />
                                                     </button>

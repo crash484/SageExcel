@@ -3,25 +3,74 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, registerables } from 'chart.js';
 import { FiDownload, FiRefreshCw, FiUpload } from 'react-icons/fi';
+import XLSX from "xlsx"
+
 
 ChartJS.register(...registerables);
 
 export default function Visualize() {
     const location = useLocation();
+    const fileId = location.state?.id;
+    const token = location.state?.token;
     const navigate = useNavigate();
     const [chartData, setChartData] = useState(null);
     const [chartType, setChartType] = useState('bar');
     const [xAxis, setXAxis] = useState('');
     const [yAxis, setYAxis] = useState('');
+    const [headers,setHeaders] = useState([]);
+    const [data,setData] = useState([]);
 
-    useEffect(() => {
-        if (location.state?.uploadedData) {
-            const { headers, data } = location.state.uploadedData;
-            setChartData({ headers, data });
-            setXAxis(headers[0]);
-            setYAxis(headers.length > 1 ? headers[1] : headers[0]);
-        }
-    }, [location.state]);
+    // useEffect(() => {
+    //     if (location.state?.uploadedData) {
+    //         const { headers, data } = location.state.uploadedData;
+    //         setChartData({ headers, data });
+    //         setXAxis(headers[0]);
+    //         setYAxis(headers.length > 1 ? headers[1] : headers[0]);
+    //     }
+    // }, [location.state]);
+
+    //getting the file from db
+    useEffect(()=>{
+        const getFile = async()=>{
+        try{
+            const url = `http://localhost:5000/api/auth/preview/${fileId}`
+            const response = await fetch(url,{
+                    headers:{
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+             if (!response.ok) throw new Error("File not found");
+
+             const blob = await response.blob();
+             const arrayBuffer = await blob.arrayBuffer();
+
+             // Parse the Excel file
+             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+             const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+             if (jsonData.length > 0) {
+                    const extractedHeaders = jsonData[0];
+                    const previewRows = jsonData.slice(1).map(row => {
+                    const obj = {};
+                    extractedHeaders.forEach((header, i) => {
+                        obj[header] = row[i];
+                    });
+                    return obj;
+                    });
+
+                    setHeaders(extractedHeaders);
+                    setData(previewRows);
+                    setChartData({ headers: extractedHeaders, data: previewRows });
+                    setXAxis(extractedHeaders[0]);
+                    setYAxis(extractedHeaders.length > 1 ? extractedHeaders[1] : extractedHeaders[0]);
+                }
+                } catch (err) {
+                console.error(err);
+                }
+            }
+        getFile()
+    },[])
 
     const generateChartData = () => {
         if (!chartData || !xAxis) return { labels: [], datasets: [] };

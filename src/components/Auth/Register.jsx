@@ -4,6 +4,17 @@ import { useDispatch } from 'react-redux'
 import { setCredentials } from '../../store/authSlice'
 import { toast } from 'react-hot-toast'
 
+const isValidEmail = (email) => {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const forbiddenDomains = ['example.com', 'test.com', 'mail.com', 'demo.com'];
+    if (!pattern.test(email)) return false;
+    const domain = email.split('@')[1].toLowerCase();
+    return !forbiddenDomains.includes(domain);
+};
+
+const isValidPassword = (password) =>
+    /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(password);
+
 export default function Register() {
     const [formData, setFormData] = useState({
         name: '',
@@ -18,9 +29,9 @@ export default function Register() {
     const { name, email, password, confirmPassword } = formData
     //url param to send data in the string in simple request format
     const url = new URLSearchParams();
-    url.append("name",formData.name);
-    url.append("email",formData.email);
-    url.append("password",formData.password);
+    url.append("name", formData.name);
+    url.append("email", formData.email);
+    url.append("password", formData.password);
 
     const handleChange = (e) => {
         setFormData((prev) => ({
@@ -31,6 +42,16 @@ export default function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+
+        if (!isValidEmail(email)) {
+            toast.error('Please enter a valid email (no test domains like example.com)');
+            return;
+        }
+
+        if (!isValidPassword(password)) {
+            toast.error('Password must be at least 8 characters, include uppercase, lowercase, number, and special character');
+            return;
+        }
 
         if (password !== confirmPassword) {
             toast.error('Passwords do not match')

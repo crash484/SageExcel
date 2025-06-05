@@ -1,4 +1,3 @@
-// Full updated Visualize.jsx with advanced Excel-like analytics features
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Bar, Line, Pie, Doughnut, Radar, Scatter } from 'react-chartjs-2';
@@ -13,6 +12,7 @@ export default function Visualize() {
     const fileId = location.state?.id;
     const token = location.state?.token;
     const navigate = useNavigate();
+
     const [chartData, setChartData] = useState(null);
     const [chartType, setChartType] = useState('bar');
     const [xAxis, setXAxis] = useState('');
@@ -21,15 +21,14 @@ export default function Visualize() {
     const [data, setData] = useState([]);
     const [groupBy, setGroupBy] = useState('');
     const [aggregation, setAggregation] = useState('sum');
+    const [chartTitle, setChartTitle] = useState('My Chart');
 
     useEffect(() => {
         const getFile = async () => {
             try {
                 const url = `http://localhost:5000/api/auth/preview/${fileId}`;
                 const response = await fetch(url, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!response.ok) throw new Error('File not found');
                 const blob = await response.blob();
@@ -40,7 +39,7 @@ export default function Visualize() {
 
                 if (jsonData.length > 0) {
                     const extractedHeaders = jsonData[0];
-                    const previewRows = jsonData.slice(1).map((row) => {
+                    const previewRows = jsonData.slice(1).map(row => {
                         const obj = {};
                         extractedHeaders.forEach((header, i) => {
                             obj[header] = row[i];
@@ -61,13 +60,9 @@ export default function Visualize() {
         getFile();
     }, []);
 
-    const isNumericColumn = (col) => {
-        return data.every(row => !isNaN(parseFloat(row[col])));
-    };
-
     const groupByAndAggregate = (groupCol, valueCol, operation = 'sum') => {
         const grouped = {};
-        data.forEach((row) => {
+        data.forEach(row => {
             const key = row[groupCol];
             const value = parseFloat(row[valueCol]) || 0;
             if (!grouped[key]) grouped[key] = [];
@@ -75,26 +70,19 @@ export default function Visualize() {
         });
         return Object.entries(grouped).map(([key, values]) => ({
             label: key,
-            value:
-                operation === 'sum'
-                    ? values.reduce((a, b) => a + b, 0)
-                    : operation === 'avg'
-                        ? values.reduce((a, b) => a + b, 0) / values.length
-                        : values.length,
+            value: operation === 'sum'
+                ? values.reduce((a, b) => a + b, 0)
+                : operation === 'avg'
+                    ? values.reduce((a, b) => a + b, 0) / values.length
+                    : values.length
         }));
     };
 
     const generateColors = (count) => {
         const baseColors = [
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
-            'rgba(255, 159, 64, 0.6)',
-            'rgba(199, 199, 199, 0.6)',
-            'rgba(83, 102, 255, 0.6)',
-            'rgba(255, 140, 184, 0.6)',
+            'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)',
+            'rgba(199, 199, 199, 0.6)', 'rgba(83, 102, 255, 0.6)', 'rgba(255, 140, 184, 0.6)',
             'rgba(100, 255, 218, 0.6)'
         ];
         const borderColors = baseColors.map(c => c.replace('0.6', '1'));
@@ -106,24 +94,20 @@ export default function Visualize() {
 
     const generateChartData = () => {
         if (!data || !xAxis) return { labels: [], datasets: [] };
-
         const finalData = groupBy && yAxis
             ? groupByAndAggregate(groupBy, yAxis, aggregation)
             : data.map(row => ({ label: row[xAxis], value: parseFloat(row[yAxis]) || 0 }));
 
         const colors = generateColors(finalData.length);
-
         return {
             labels: finalData.map(d => d.label),
-            datasets: [
-                {
-                    label: `${yAxis} vs ${xAxis}`,
-                    data: finalData.map(d => d.value),
-                    backgroundColor: colors.backgroundColor,
-                    borderColor: colors.borderColor,
-                    borderWidth: 1,
-                },
-            ],
+            datasets: [{
+                label: `${yAxis} vs ${xAxis}`,
+                data: finalData.map(d => d.value),
+                backgroundColor: colors.backgroundColor,
+                borderColor: colors.borderColor,
+                borderWidth: 1
+            }]
         };
     };
 
@@ -139,24 +123,31 @@ export default function Visualize() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
+            title: {
+                display: true,
+                text: chartTitle,
+                font: { size: 18, weight: 'bold' }
+            },
             legend: { position: 'top' },
             tooltip: {
                 callbacks: {
-                    label: function (context) {
-                        return `${context.label}: ${context.raw}`;
-                    },
-                },
-            },
-        },
+                    label: context => `${context.label}: ${context.raw}`
+                }
+            }
+        }
+    };
+
+    const handleReset = () => {
+        setChartType('bar');
+        setXAxis(headers[0]);
+        setYAxis(headers.length > 1 ? headers[1] : headers[0]);
+        setGroupBy(headers[0]);
+        setAggregation('sum');
+        setChartTitle('My Chart');
     };
 
     const ChartComponent = {
-        bar: Bar,
-        line: Line,
-        pie: Pie,
-        doughnut: Doughnut,
-        radar: Radar,
-        scatter: Scatter,
+        bar: Bar, line: Line, pie: Pie, doughnut: Doughnut, radar: Radar, scatter: Scatter
     }[chartType];
 
     return (
@@ -169,76 +160,58 @@ export default function Visualize() {
                     </button>
                 </div>
 
-                {chartData ? (
+                {chartData && (
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
                             <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Chart Configuration</h2>
-
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chart Type</label>
-                                    <select
-                                        value={chartType}
-                                        onChange={(e) => setChartType(e.target.value)}
-                                        className="w-full rounded-md border-gray-300 dark:bg-gray-700"
-                                    >
-                                        <option value="bar">Bar Chart</option>
-                                        <option value="line">Line Chart</option>
-                                        <option value="pie">Pie Chart</option>
-                                        <option value="doughnut">Doughnut Chart</option>
-                                        <option value="radar">Radar Chart</option>
-                                        <option value="scatter">Scatter Plot</option>
-                                    </select>
+                                    <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Chart Title</label>
+                                    <input
+                                        value={chartTitle}
+                                        onChange={e => setChartTitle(e.target.value)}
+                                        className="w-full rounded-md border-gray-300 dark:bg-gray-700 dark:text-white"
+                                    />
                                 </div>
-
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">X-Axis</label>
-                                    <select
-                                        value={xAxis}
-                                        onChange={(e) => setXAxis(e.target.value)}
-                                        className="w-full rounded-md border-gray-300 dark:bg-gray-700"
-                                    >
-                                        {headers.map((header, i) => (
-                                            <option key={i} value={header}>{header}</option>
-                                        ))}
+                                    <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Chart Type</label>
+                                    <select value={chartType} onChange={e => setChartType(e.target.value)}
+                                        className="w-full rounded-md border-gray-300 dark:bg-gray-700">
+                                        <option value="bar">Bar</option>
+                                        <option value="line">Line</option>
+                                        <option value="pie">Pie</option>
+                                        <option value="doughnut">Doughnut</option>
+                                        <option value="radar">Radar</option>
+                                        <option value="scatter">Scatter</option>
                                     </select>
                                 </div>
-
+                                <div>
+                                    <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">X-Axis</label>
+                                    <select value={xAxis} onChange={e => setXAxis(e.target.value)}
+                                        className="w-full rounded-md border-gray-300 dark:bg-gray-700">
+                                        {headers.map((h, i) => <option key={i}>{h}</option>)}
+                                    </select>
+                                </div>
                                 {chartType !== 'pie' && (
                                     <>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Y-Axis</label>
-                                            <select
-                                                value={yAxis}
-                                                onChange={(e) => setYAxis(e.target.value)}
-                                                className="w-full rounded-md border-gray-300 dark:bg-gray-700"
-                                            >
-                                                {headers.map((header, i) => (
-                                                    <option key={i} value={header}>{header}</option>
-                                                ))}
+                                            <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Y-Axis</label>
+                                            <select value={yAxis} onChange={e => setYAxis(e.target.value)}
+                                                className="w-full rounded-md border-gray-300 dark:bg-gray-700">
+                                                {headers.map((h, i) => <option key={i}>{h}</option>)}
                                             </select>
                                         </div>
-
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Group By</label>
-                                            <select
-                                                value={groupBy}
-                                                onChange={(e) => setGroupBy(e.target.value)}
-                                                className="w-full rounded-md border-gray-300 dark:bg-gray-700"
-                                            >
-                                                {headers.map((header, i) => (
-                                                    <option key={i} value={header}>{header}</option>
-                                                ))}
+                                            <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Group By</label>
+                                            <select value={groupBy} onChange={e => setGroupBy(e.target.value)}
+                                                className="w-full rounded-md border-gray-300 dark:bg-gray-700">
+                                                {headers.map((h, i) => <option key={i}>{h}</option>)}
                                             </select>
                                         </div>
-
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Aggregation</label>
-                                            <select
-                                                value={aggregation}
-                                                onChange={(e) => setAggregation(e.target.value)}
-                                                className="w-full rounded-md border-gray-300 dark:bg-gray-700"
-                                            >
+                                            <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Aggregation</label>
+                                            <select value={aggregation} onChange={e => setAggregation(e.target.value)}
+                                                className="w-full rounded-md border-gray-300 dark:bg-gray-700">
                                                 <option value="sum">Sum</option>
                                                 <option value="avg">Average</option>
                                                 <option value="count">Count</option>
@@ -246,12 +219,11 @@ export default function Visualize() {
                                         </div>
                                     </>
                                 )}
-
                                 <div className="flex space-x-2 pt-4">
-                                    <button onClick={() => window.location.reload()} className="flex items-center px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-md">
+                                    <button onClick={handleReset} className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center">
                                         <FiRefreshCw className="mr-2" /> Reset
                                     </button>
-                                    <button onClick={downloadChart} className="flex items-center px-3 py-2 bg-indigo-600 text-white rounded-md">
+                                    <button onClick={downloadChart} className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center">
                                         <FiDownload className="mr-2" /> Export
                                     </button>
                                 </div>
@@ -266,32 +238,7 @@ export default function Visualize() {
                                     options={chartOptions}
                                 />
                             </div>
-
-                            <div className="mt-6 overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead className="bg-gray-50 dark:bg-gray-700">
-                                        <tr>
-                                            {headers.map((header, i) => (
-                                                <th key={i} className="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{header}</th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {data.slice(0, 5).map((row, i) => (
-                                            <tr key={i}>
-                                                {headers.map((header, j) => (
-                                                    <td key={j} className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{row[header]}</td>
-                                                ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-12">
-                        <p className="text-gray-600 dark:text-gray-400">No chart data available. Please upload a file first.</p>
                     </div>
                 )}
             </div>

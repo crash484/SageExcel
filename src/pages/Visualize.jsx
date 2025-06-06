@@ -233,7 +233,7 @@ export default function Visualize() {
                                     <option value="3dscatter">3D Scatter</option>
                                     <option value="3dsurface">3D Surface</option>
                                     <option value="3dmesh">3D Mesh</option>
-                                    <option value="3dbar">3D Bar</option>
+                                    {/* <option value="3dbar">3D Bar</option> */}
                                 </select>
                             </div>
                             <div>

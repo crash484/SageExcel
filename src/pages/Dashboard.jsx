@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { selectCurrentToken } from '../store/authSlice';
-import { useSelector } from 'react-redux'
 import SendRequest from '../../src/api/SendRequest';
+import { motion } from 'framer-motion';
+import { FaFileAlt, FaChartBar, FaSave } from 'react-icons/fa';
 
-const Dashboard =  () => {
-    const  token  = useSelector(selectCurrentToken)
-    //this makes so that it will always verify the token once when the page is loaded at first
-    useEffect(()=>{
+const Dashboard = () => {
+    const token = useSelector(selectCurrentToken);
+
+    useEffect(() => {
         (async () => {
             try {
                 const data = await SendRequest(token);
@@ -15,34 +17,62 @@ const Dashboard =  () => {
                 console.error(error);
             }
         })();
-    },[token])
+    }, [token]);
+
+    const stats = [
+        { icon: <FaFileAlt />, label: 'Files Uploaded', value: 5 },
+        { icon: <FaChartBar />, label: 'Analyses Performed', value: 12 },
+        { icon: <FaSave />, label: 'Saved Charts', value: 8 },
+    ];
+
+    const activities = [
+        { action: 'Uploaded "sales_data.xlsx"', time: '2 hours ago' },
+        { action: 'Generated Bar Chart for Expenses', time: 'Yesterday' },
+        { action: 'Exported Summary Report', time: '2 days ago' },
+    ];
+
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                Welcome to your Dashboard
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+                📊 Welcome to your Dashboard
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200">Files Uploaded</h3>
-                    <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">0</p>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200">Analyses Performed</h3>
-                    <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">0</p>
-                </div>
-
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200">Saved Charts</h3>
-                    <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">0</p>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {stats.map(({ icon, label, value }, index) => (
+                    <motion.div
+                        key={label}
+                        className="bg-gray-50 dark:bg-gray-700 p-5 rounded-xl shadow-md"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.2 }}
+                        whileHover={{ scale: 1.05 }}
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="text-indigo-600 dark:text-indigo-400 text-3xl">{icon}</div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{label}</h3>
+                                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{value}</p>
+                            </div>
+                        </div>
+                    </motion.div>
+                ))}
             </div>
 
-            <div className="mt-8">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Recent Activity</h3>
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                    <p className="text-gray-500 dark:text-gray-400">No recent activity</p>
+            <div className="mt-10">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">📁 Recent Activity</h3>
+                <div className="space-y-4">
+                    {activities.map((activity, i) => (
+                        <motion.div
+                            key={i}
+                            className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md shadow-sm"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.15 }}
+                        >
+                            <p className="text-gray-700 dark:text-gray-200">{activity.action}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{activity.time}</p>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </div>

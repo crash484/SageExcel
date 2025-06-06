@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { setCredentials } from '../../store/authSlice'
-import { toast } from 'react-hot-toast'
+// LoginPage.jsx
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Lottie from 'lottie-react';
+import excelChartAnim from './animations/Animation - 1749184199071.json'; // Add an Excel chart-like Lottie animation
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../../store/authSlice';
+import { toast } from 'react-hot-toast';
 
 const isValidEmail = (email) => {
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,30 +19,19 @@ const isValidEmail = (email) => {
 const isValidPassword = (password) =>
     /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(password);
 
-export default function Login() {
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    })
-    const [isLoading, setIsLoading] = useState(false)
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-
-    const { email, password } = formData
-    //url param so as to bypass preflight request
-    const url = new URLSearchParams();
-    url.append("email", formData.email);
-    url.append("password", formData.password);
+export default function LoginPage() {
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleChange = (e) => {
-        setFormData((prev) => ({
-            ...prev,
-            [e.target.name]: e.target.value,
-        }))
-    }
+        setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    };
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
+        const { email, password } = formData;
 
         if (!isValidEmail(email)) {
             toast.error('Please enter a valid email (no test domains like example.com)');
@@ -50,113 +43,97 @@ export default function Login() {
             return;
         }
 
-        setIsLoading(true)
+        const url = new URLSearchParams();
+        url.append('email', email);
+        url.append('password', password);
+        setIsLoading(true);
 
         try {
-            // Replace with actual API call
             const response = await fetch('http://localhost:5000/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: url.toString()
-            })
+                body: url.toString(),
+            });
 
-            const data = await response.json()
+            const data = await response.json();
 
             if (response.ok) {
-                dispatch(setCredentials(data))
-                navigate('/dashboard')
-                toast.success('Login successful!')
+                dispatch(setCredentials(data));
+                navigate('/dashboard');
+                toast.success('Login successful!');
             } else {
-                toast.error(data.message || 'Login failed')
+                toast.error(data.message || 'Login failed');
             }
         } catch (error) {
-            toast.error('An error occurred')
+            toast.error('An error occurred');
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
-            <div className="max-w-md w-full space-y-8">
-                <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-gray-100">
-                        Sign in to your account
-                    </h2>
-                </div>
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="rounded-md shadow-sm space-y-4">
-                        <div>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                required
-                                value={email}
-                                onChange={handleChange}
-                                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Email address"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={handleChange}
-                                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Password"
-                            />
-                        </div>
-                    </div>
+        <div className="min-h-screen flex">
+            {/* Left Animated Info Panel */}
+            <motion.div
+                className="hidden md:flex flex-col justify-center items-center w-1/2 bg-gradient-to-br from-blue-600 to-indigo-800 text-white p-10"
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.8 }}
+            >
+                <Lottie animationData={excelChartAnim} loop className="w-80 mb-6" />
+                <h1 className="text-4xl font-bold mb-4">SageExcel</h1>
+                <p className="text-lg text-center">
+                    Visualize and analyze your Excel data effortlessly. Empower your decisions with interactive dashboards.
+                </p>
+            </motion.div>
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <input
-                                id="remember-me"
-                                name="remember-me"
-                                type="checkbox"
-                                className="h-4 w-4 text-indigo-600 dark:text-indigo-400 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                            />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                                Remember me
-                            </label>
-                        </div>
-
-                        <div className="text-sm">
-                            <a href="#" className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">
-                                Forgot your password?
-                            </a>
-                        </div>
-                    </div>
-
-                    <div>
-                        <button
+            {/* Right Form Panel */}
+            <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+                <motion.div
+                    className="bg-white dark:bg-gray-800 bg-opacity-90 p-10 rounded-2xl shadow-xl w-full max-w-md"
+                    initial={{ y: 30, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Welcome</h2>
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="w-full p-3 mb-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            required
+                        />
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className="w-full p-3 mb-6 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            required
+                        />
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             type="submit"
                             disabled={isLoading}
-                            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            {isLoading ? (
-                                <>
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Signing in...
-                                </>
-                            ) : 'Sign in'}
-                        </button>
-                    </div>
-                </form>
-                <div className="text-center text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Don't have an account? </span>
-                    <Link to="/register" className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">
-                        Sign up
-                    </Link>
-                </div>
+                            {isLoading ? 'Signing in...' : 'Sign In'}
+                        </motion.button>
+                    </form>
+                    <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                        Don’t have an account?{' '}
+                        <Link to="/register" className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+                            Register here
+                        </Link>
+                    </p>
+                </motion.div>
             </div>
         </div>
-    )
+    );
 }
+

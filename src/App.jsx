@@ -10,6 +10,7 @@ import History from './pages/History';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Visualize from './pages/Visualize';
+import LandingPage  from './pages/LandingPage'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Toaster position="top-right" />
             <Routes>
                 {/* Public routes */}
+                <Route path="/landing" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
@@ -36,7 +38,7 @@ function App() {
                 {/* Protected routes */}
                 <Route
                     path="/"
-                    element={DEV_BYPASS_AUTH || token ? <DashboardLayout /> : <Navigate to="/login" replace />}
+                    element={DEV_BYPASS_AUTH || token ? <DashboardLayout /> : <Navigate to="/landing" replace />}
                 >
                     <Route index element={<Dashboard />} />
                     <Route path="dashboard" element={<Dashboard />} />

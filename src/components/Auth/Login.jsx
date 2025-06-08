@@ -7,6 +7,7 @@ import excelChartAnim from './animations/Animation - 1749184199071.json'; // Add
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../store/authSlice';
 import { toast } from 'react-hot-toast';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const isValidEmail = (email) => {
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,11 +18,12 @@ const isValidEmail = (email) => {
 };
 
 const isValidPassword = (password) =>
-    /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(password);
+            /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/.test(password);
 
 export default function LoginPage() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword,setShowPassword] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -106,8 +108,10 @@ export default function LoginPage() {
                             className="w-full p-3 mb-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
                             required
                         />
+                        <div className='relative'>
                         <input
-                            type="password"
+
+                            type= {showPassword ? 'text' : 'password'}
                             name="password"
                             placeholder="Password"
                             value={formData.password}
@@ -115,6 +119,14 @@ export default function LoginPage() {
                             className="w-full p-3 mb-6 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
                             required
                         />
+                        <button
+                            type = "button"
+                            onClick={()=> setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-4 flex items-center text-sm text-gray-500 dark:text-gray-300 pb-5"       
+                            >
+                            {showPassword ? <FiEyeOff /> : <FiEye />}
+                        </button>
+                        </div>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}

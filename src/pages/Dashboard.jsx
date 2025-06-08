@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentToken } from '../store/authSlice';
 import SendRequest from '../../src/api/SendRequest';
@@ -7,20 +7,33 @@ import { FaFileAlt, FaChartBar, FaSave } from 'react-icons/fa';
 
 const Dashboard = () => {
     const token = useSelector(selectCurrentToken);
+    const [fileCount,setFileCount]=useState(0);
 
     useEffect(() => {
-        (async () => {
+        const getInfo=(async () => {
             try {
-                const data = await SendRequest(token);
-                console.log('Verification result:', data);
+                const response = await fetch('http://localhost:5000/api/auth/getFiles', {
+                method: 'GET',
+                headers: { 
+                    'Authorization': `Bearer ${token}`
+                 }
+            });
+            const data = await response.json();
+            if(response.ok){
+                const user=data.user;
+                const files = user.uploadedFiles.length;
+                setFileCount(files);
+            }
             } catch (error) {
                 console.error(error);
             }
-        })();
+        });
+        getInfo();
+
     }, [token]);
 
     const stats = [
-        { icon: <FaFileAlt />, label: 'Files Uploaded', value: 5 },
+        { icon: <FaFileAlt />, label: 'Files Uploaded', value: fileCount },
         { icon: <FaChartBar />, label: 'Analyses Performed', value: 12 },
         { icon: <FaSave />, label: 'Saved Charts', value: 8 },
     ];
@@ -30,6 +43,7 @@ const Dashboard = () => {
         { action: 'Generated Bar Chart for Expenses', time: 'Yesterday' },
         { action: 'Exported Summary Report', time: '2 days ago' },
     ];
+    
 
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">

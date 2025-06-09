@@ -11,6 +11,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Visualize from './pages/Visualize';
 import LandingPage  from './pages/LandingPage'
+import AdminDashboard from './pages/AdminDashboard'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
                     <Route path="history" element={<History />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
+                    <Route path="admin" element={<AdminDashboard />} />
                     {/* Add other protected routes here */}
                 </Route>
 

@@ -129,7 +129,7 @@ router.post('/register',async (req,res)=>{
       if(!user){
         return res.status(404).json({ message: 'user not found' })
       }
-
+      console.log('sent')
       return res.status(200).json({ user })
     }
     catch(err){

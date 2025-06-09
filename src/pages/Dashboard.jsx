@@ -8,6 +8,10 @@ import { FaFileAlt, FaChartBar, FaSave } from 'react-icons/fa';
 const Dashboard = () => {
     const token = useSelector(selectCurrentToken);
     const [fileCount,setFileCount]=useState(0);
+    const [file,setFile] = useState([{
+        "filename":"",
+        "date":""
+    }])
 
     useEffect(() => {
         const getInfo=(async () => {
@@ -20,9 +24,13 @@ const Dashboard = () => {
             });
             const data = await response.json();
             if(response.ok){
-                const user=data.user;
-                const files = user.uploadedFiles.length;
-                setFileCount(files);
+                const user= data.user;
+                const allFiles = user.uploadedFiles;
+                const fileData = allFiles.map(file =>({
+                    filename: file.filename,
+                    date: file.date
+                }))
+                setFile(fileData);
             }
             } catch (error) {
                 console.error(error);
@@ -33,16 +41,15 @@ const Dashboard = () => {
     }, [token]);
 
     const stats = [
-        { icon: <FaFileAlt />, label: 'Files Uploaded', value: fileCount },
+        { icon: <FaFileAlt />, label: 'Files Uploaded', value: file.length },
         { icon: <FaChartBar />, label: 'Analyses Performed', value: 12 },
         { icon: <FaSave />, label: 'Saved Charts', value: 8 },
     ];
 
-    const activities = [
-        { action: 'Uploaded "sales_data.xlsx"', time: '2 hours ago' },
-        { action: 'Generated Bar Chart for Expenses', time: 'Yesterday' },
-        { action: 'Exported Summary Report', time: '2 days ago' },
-    ];
+        const activities = file.slice(-3).reverse().map(f => ({
+            action: `Uploaded ${f.filename}`,
+            time: new Date(f.date).toLocaleString(),
+        }));
     
 
     return (

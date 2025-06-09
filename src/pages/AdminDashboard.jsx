@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { selectCurrentToken } from '../store/authSlice';
 import { motion } from 'framer-motion';
 import { FaUserShield, FaUserAlt } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 
 const AdminDashboard = () => {
     const token = useSelector(selectCurrentToken);
@@ -39,13 +40,65 @@ const AdminDashboard = () => {
         fetchUsers();
     }, [token, navigate]);
 
-    const toggleAdmin = (id) => {
-        setUsers((prev) =>
-            prev.map((user) =>
-                user._id === id ? { ...user, isAdmin: !user.isAdmin } : user
-            )
-        );
-    };
+    //function to revoke user admin privilege
+    const handleRevoke = async (userid)=>{
+        try{
+            const url = new URLSearchParams();
+            url.append('userId',userid);
+            const response = await fetch('http://localhost:5000/api/auth/revokeAdmin', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: url.toString()
+                });
+            const data = await response.json();
+            if(response.ok){
+                toast.success("Admin prvilege's successfully revoked");
+                 setUsers(prev =>
+                        prev.map(user =>
+                        user._id === userid ? { ...user, isAdmin: false } : user
+                        )
+                    );
+            }else{
+                toast.error("unable to revoke privilege's")
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    //function to give user admin privilege
+    const handleGiveAdmin = async (userid)=>{
+        try{
+            const url = new URLSearchParams();
+            url.append('userId',userid);
+            const response = await fetch('http://localhost:5000/api/auth/giveAdmin', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: url.toString()
+                });
+            const data = await response.json();
+            if(response.ok){
+                toast.success("Admin prvilege's successfully given");
+                setUsers(prev =>
+                        prev.map(user =>
+                        user._id === userid ? { ...user, isAdmin: true } : user
+                        )
+                    );
+            }else{
+                toast.error("unable to give privilege's")
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+
 
     if (loading) return <div className="text-center mt-10 text-lg text-gray-600 dark:text-gray-300">Loading users...</div>;
 
@@ -93,9 +146,16 @@ const AdminDashboard = () => {
                                 </td>
                                 <td className="px-4 py-3">
                                     <button
-                                        onClick={() => toggleAdmin(user._id)}
+                                        onClick={() => {
+                                            if (user.isAdmin) {
+                                            handleRevoke(user._id);
+                                            console.log("clicked")
+                                            } else {
+                                            handleGiveAdmin(user._id);
+                                            }
+                                        }}
                                         className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded transition"
-                                    >
+                                        >
                                         {user.isAdmin ? 'Revoke Admin' : 'Make Admin'}
                                     </button>
                                 </td>

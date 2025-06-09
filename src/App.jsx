@@ -48,7 +48,7 @@ function App() {
                     <Route path="history" element={<History />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="admin" element={<AdminDashboard />} />
                     {/* Add other protected routes here */}
                 </Route>
 

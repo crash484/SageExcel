@@ -20,7 +20,6 @@ const upload = multer({ storage });
 //signup
 router.post('/register',async (req,res)=>{
     try{
-    console.log(req.body);
     const {name,email,password} = req.body;
     //create check if user with email already exists or not
     const hashed = await bcrypt.hash(password, 10); //hashing the password
@@ -114,6 +113,7 @@ router.post('/register',async (req,res)=>{
   router.get("/getUser",verifyToken,async (req,res)=>{
     try{
       const user = await User.findOne({ email: req.user.email });
+      console.log("in here")
       return res.status(200).json({ user: user })
     }catch(err){
       console.log(err)
@@ -193,6 +193,17 @@ router.post('/register',async (req,res)=>{
     console.error(err);
     res.status(500).send('Server error');
   }
+});
+
+ //route for returning all users
+router.get('/getAllUsers', verifyToken, async (req, res) => {
+    try {
+        const users = await User.find({}, '-password'); // exclude password
+        res.status(200).json({ users });
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 export default router;

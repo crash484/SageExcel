@@ -5,47 +5,49 @@ import { selectCurrentToken } from '../store/authSlice';
 import { motion } from 'framer-motion';
 import { FaUserShield, FaUserAlt } from 'react-icons/fa';
 
-
-const mockUsers = [
-    { id: 1, username: 'john_doe', uploadedFiles: 5, isAdmin: false },
-    { id: 2, username: 'admin_girl', uploadedFiles: 12, isAdmin: true },
-    { id: 3, username: 'sammy', uploadedFiles: 2, isAdmin: false },
-];
-
 const AdminDashboard = () => {
     const token = useSelector(selectCurrentToken);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fake auth check using token (mocking a real request)
-        // You'd replace this with an API call to validate token & get user info
-        const checkAdmin = async () => {
+        const fetchUsers = async () => {
             try {
-                const response = await fetch("http://localhost:5000/api/auth/getUser",{
-                    headers:{
-                        'Authorization': `Bearer${token}`
+                const response = await fetch('http://localhost:5000/api/auth/getAllUsers', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
                 });
+
                 const data = await response.json();
+
+                if (response.ok) {
+                    setUsers(data.users || []);
+                    setLoading(false);
+                } else {
+                    console.error('Unauthorized access. Redirecting...');
+                    navigate('/dashboard');
+                }
             } catch (err) {
-                console.error('Auth check failed', err);
+                console.error('Error fetching users:', err);
                 navigate('/dashboard');
             }
         };
 
-        checkAdmin();
-        setUsers(mockUsers); // Load mock data
+        fetchUsers();
     }, [token, navigate]);
 
     const toggleAdmin = (id) => {
         setUsers((prev) =>
             prev.map((user) =>
-                user.id === id ? { ...user, isAdmin: !user.isAdmin } : user
+                user._id === id ? { ...user, isAdmin: !user.isAdmin } : user
             )
         );
     };
+
+    if (loading) return <div className="text-center mt-10 text-lg text-gray-600 dark:text-gray-300">Loading users...</div>;
 
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
@@ -66,17 +68,17 @@ const AdminDashboard = () => {
                     <tbody>
                         {users.map((user, index) => (
                             <motion.tr
-                                key={user.id}
+                                key={user._id}
                                 className="hover:bg-gray-100 dark:hover:bg-gray-600 transition"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
                             >
                                 <td className="px-4 py-3 text-gray-900 dark:text-gray-200">
-                                    {user.username}
+                                    {user.name || user.username || user.email}
                                 </td>
                                 <td className="px-4 py-3 text-indigo-600 dark:text-indigo-400 font-semibold">
-                                    {user.uploadedFiles}
+                                    {user.uploadedFiles?.length || 0}
                                 </td>
                                 <td className="px-4 py-3">
                                     {user.isAdmin ? (
@@ -91,7 +93,7 @@ const AdminDashboard = () => {
                                 </td>
                                 <td className="px-4 py-3">
                                     <button
-                                        onClick={() => toggleAdmin(user.id)}
+                                        onClick={() => toggleAdmin(user._id)}
                                         className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded transition"
                                     >
                                         {user.isAdmin ? 'Revoke Admin' : 'Make Admin'}

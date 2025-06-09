@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SunIcon, MoonIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const DashboardLayout = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -14,21 +14,6 @@ const DashboardLayout = () => {
     const navigate = useNavigate();
     const user = useSelector((state) => state.auth.user);
 
-    // THEME TOGGLE
-    const [theme, setTheme] = useState(() =>
-        localStorage.getItem('theme') || 'light'
-    );
-
-    useEffect(() => {
-        document.documentElement.classList.toggle('dark', theme === 'dark');
-        localStorage.setItem('theme', theme);
-    }, [theme]);
-
-    const toggleTheme = () => {
-        setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-    };
-
-    // DROPDOWN
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -47,22 +32,21 @@ const DashboardLayout = () => {
 
     const navLinkClass = ({ isActive }) =>
         isActive
-            ? 'border-indigo-500 dark:border-indigo-400 text-gray-900 dark:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium'
-            : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium';
+            ? 'relative text-indigo-100 dark:text-indigo-400 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-white dark:after:bg-indigo-400'
+            : 'text-gray-300 hover:text-white dark:hover:text-indigo-200 relative transition-colors duration-200';
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-            <nav className="bg-white dark:bg-gray-800 shadow-sm fixed top-0 left-0 right-0 z-30">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 bg-[url('/pattern.svg')] bg-top bg-fixed">
+            <nav className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 shadow-lg fixed top-0 left-0 right-0 z-30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
                     <div className="flex items-center">
-                        {/* MOBILE MENU BUTTON */}
                         <button
-                            className="sm:hidden text-gray-600 dark:text-gray-200 mr-4"
+                            className="sm:hidden text-white mr-4"
                             onClick={() => setIsMobileMenuOpen(true)}
                         >
                             <Bars3Icon className="h-6 w-6" />
                         </button>
-                        <h1 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">SageExcel</h1>
+                        <h1 className="text-xl font-bold text-white">SageExcel</h1>
                         <div className="hidden sm:flex sm:space-x-8 ml-6">
                             <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
                             <NavLink to="/upload" className={navLinkClass}>Upload</NavLink>
@@ -71,17 +55,7 @@ const DashboardLayout = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* THEME TOGGLE */}
-                        <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-300 hover:text-indigo-500">
-                            {theme === 'dark' ? (
-                                <SunIcon className="h-6 w-6" />
-                            ) : (
-                                <MoonIcon className="h-6 w-6" />
-                            )}
-                        </button>
-
-                        {/* PROFILE DROPDOWN */}
-                        <div className="relative" ref={dropdownRef}>
+                        <div className="group relative" ref={dropdownRef}>
                             <button
                                 type="button"
                                 className="flex rounded-full bg-white dark:bg-gray-800 text-sm focus:outline-none"
@@ -91,6 +65,9 @@ const DashboardLayout = () => {
                                     {user?.name?.charAt(0).toUpperCase() || 'U'}
                                 </div>
                             </button>
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max px-2 py-1 text-xs rounded bg-black text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                                Hello, {user?.name?.split(' ')[0] || 'User'}!
+                            </span>
 
                             <AnimatePresence>
                                 {isDropdownOpen && (
@@ -111,7 +88,6 @@ const DashboardLayout = () => {
                 </div>
             </nav>
 
-            {/* MOBILE MENU OVERLAY */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.aside
@@ -124,7 +100,7 @@ const DashboardLayout = () => {
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Menu</h2>
                             <button onClick={() => setIsMobileMenuOpen(false)}>
-                                <XIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                                <XMarkIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                             </button>
                         </div>
                         <nav className="flex flex-col space-y-4">
@@ -136,12 +112,17 @@ const DashboardLayout = () => {
                 )}
             </AnimatePresence>
 
-            {/* Main Content */}
             <main className="pt-20">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="px-4 py-6 sm:px-0">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                        className="px-4 py-6 sm:px-0"
+                    >
                         <Outlet />
-                    </div>
+                    </motion.div>
                 </div>
             </main>
         </div>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bar, Line, Pie, Doughnut, Radar, Scatter } from 'react-chartjs-2';
 import { Chart as ChartJS, registerables } from 'chart.js';
-import { FiDownload, FiRefreshCw, FiUpload } from 'react-icons/fi';
+import { Chart } from 'react-chartjs-2';
+import { FiDownload, FiRefreshCw } from 'react-icons/fi';
 import XLSX from 'xlsx';
+import jsPDF from 'jspdf';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import analyticsAnimation from './animation/Animation - 1749444335721.json';
@@ -25,6 +26,9 @@ export default function Visualize() {
     const [groupBy, setGroupBy] = useState('');
     const [aggregation, setAggregation] = useState('sum');
     const [chartTitle, setChartTitle] = useState('My Chart');
+    const [exportFormat, setExportFormat] = useState('png');
+
+    const chartRef = useRef(null);
 
     useEffect(() => {
         const getFile = async () => {
@@ -73,11 +77,12 @@ export default function Visualize() {
         });
         return Object.entries(grouped).map(([key, values]) => ({
             label: key,
-            value: operation === 'sum'
-                ? values.reduce((a, b) => a + b, 0)
-                : operation === 'avg'
-                    ? values.reduce((a, b) => a + b, 0) / values.length
-                    : values.length
+            value:
+                operation === 'sum'
+                    ? values.reduce((a, b) => a + b, 0)
+                    : operation === 'avg'
+                        ? values.reduce((a, b) => a + b, 0) / values.length
+                        : values.length,
         }));
     };
 
@@ -115,11 +120,37 @@ export default function Visualize() {
     };
 
     const downloadChart = () => {
-        const canvas = document.getElementById('chart-canvas');
-        const link = document.createElement('a');
-        link.download = `${chartType}-chart.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        const chartInstance = chartRef.current;
+        const canvas = chartInstance?.canvas;
+
+        if (!canvas) {
+            console.error('Canvas not found');
+            return;
+        }
+
+        const safeTitle = (chartTitle || chartType).replace(/[^a-z0-9]/gi, ' ').toLowerCase();
+        const imgData = canvas.toDataURL('image/png');
+
+        if (exportFormat === 'png') {
+            const link = document.createElement('a');
+            link.download = `${safeTitle}.png`;
+            link.href = imgData;
+            link.click();
+        } else if (exportFormat === 'pdf') {
+            const pdf = new jsPDF();
+            const pageWidth = pdf.internal.pageSize.getWidth();
+
+            const imgProps = pdf.getImageProperties(imgData);
+            const ratio = imgProps.width / imgProps.height;
+            const pdfWidth = pageWidth * 0.9;
+            const pdfHeight = pdfWidth / ratio;
+            const x = (pageWidth - pdfWidth) / 2;
+            const y = 20;
+
+            pdf.text(chartTitle, x, 15);
+            pdf.addImage(imgData, 'PNG', x, y, pdfWidth, pdfHeight);
+            pdf.save(`${safeTitle}.pdf`);
+        }
     };
 
     const chartOptions = {
@@ -149,10 +180,6 @@ export default function Visualize() {
         setChartTitle('My Chart');
     };
 
-    const ChartComponent = {
-        bar: Bar, line: Line, pie: Pie, doughnut: Doughnut, radar: Radar, scatter: Scatter
-    }[chartType];
-
     return (
         <div className="min-h-screen bg-gradient-to-tr from-gray-100 via-indigo-100 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
             <div className="max-w-7xl mx-auto">
@@ -173,9 +200,9 @@ export default function Visualize() {
                         <Lottie animationData={analyticsAnimation} className="h-96 w-96" />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div className="flex flex-col lg:flex-row gap-6 items-stretch">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-                            className="backdrop-blur-md bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 p-6 rounded-2xl shadow-lg">
+                            className="w-full lg:w-1/4 backdrop-blur-md bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 p-6 rounded-2xl shadow-lg overflow-y-auto max-h-[90vh]">
                             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Configure Chart</h2>
                             <div className="space-y-4">
                                 <label className="block text-sm text-gray-600 dark:text-gray-300 mt-2">Title</label>
@@ -221,27 +248,39 @@ export default function Visualize() {
                                     </>
                                 )}
 
-                                <div className="flex space-x-2">
-                                    <button onClick={handleReset} className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg py-2 hover:bg-gray-400">
-                                        <FiRefreshCw className="inline mr-1" /> Reset
-                                    </button>
-                                    <button onClick={downloadChart} className="flex-1 bg-indigo-600 text-white rounded-lg py-2 hover:bg-indigo-700">
+                                <div className="flex space-x-2 items-center">
+                                    <select
+                                        value={exportFormat}
+                                        onChange={(e) => setExportFormat(e.target.value)}
+                                        className="px-3 py-2 rounded-md bg-white dark:bg-gray-700 border dark:border-gray-600 text-sm"
+                                    >
+                                        <option value="png">Export as PNG</option>
+                                        <option value="pdf">Export as PDF</option>
+                                    </select>
+                                    <button
+                                        onClick={downloadChart}
+                                        className="bg-indigo-600 text-white rounded-lg py-2 px-4 hover:bg-indigo-700"
+                                    >
                                         <FiDownload className="inline mr-1" /> Export
                                     </button>
                                 </div>
+
+                                <button onClick={handleReset} className="w-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg py-2 hover:bg-gray-400 mt-2">
+                                    <FiRefreshCw className="inline mr-1" /> Reset
+                                </button>
                             </div>
                         </motion.div>
 
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-                            className="lg:col-span-3 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                            className="w-full lg:w-3/4 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
                             <motion.div
                                 key={chartType}
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5 }}
-                                className="h-96"
+                                className="flex-1 min-h-[500px]"
                             >
-                                <ChartComponent id="chart-canvas" data={generateChartData()} options={chartOptions} />
+                                <Chart ref={chartRef} type={chartType} data={generateChartData()} options={chartOptions} />
                             </motion.div>
                         </motion.div>
                     </div>

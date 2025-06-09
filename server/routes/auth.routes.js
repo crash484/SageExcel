@@ -113,7 +113,6 @@ router.post('/register',async (req,res)=>{
   router.get("/getUser",verifyToken,async (req,res)=>{
     try{
       const user = await User.findOne({ email: req.user.email });
-      console.log("in here")
       return res.status(200).json({ user: user })
     }catch(err){
       console.log(err)
@@ -129,7 +128,6 @@ router.post('/register',async (req,res)=>{
       if(!user){
         return res.status(404).json({ message: 'user not found' })
       }
-      console.log('sent')
       return res.status(200).json({ user })
     }
     catch(err){
@@ -205,5 +203,41 @@ router.get('/getAllUsers', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+//route for revoking admin privileges 
+router.put("/revokeAdmin",verifyToken, async (req,res)=>{
+    try{
+      const userId = req.body.userId;
+      const user = await User.findOne({ _id:userId });
+      if(user){
+        user.isAdmin = false;
+        await user.save();
+        res.status(200).json({message:"successfully revoked privileges"})
+      }else{
+        res.status(404).json({message:"user not found"})
+      }
+    }catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Server error" });
+    }
+})
+
+//route for giving admin privileges
+router.put("/giveAdmin",verifyToken, async (req,res)=>{
+    try{
+      const userId = req.body.userId;
+      const user = await User.findOne({ _id:userId });
+      if(user){
+        user.isAdmin = true;
+        await user.save();
+        res.status(200).json({message:"successfully given admin privileges"})
+      }else{
+        res.status(404).json({message:"user not found"})
+      }
+    }catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Server error" });
+    }
+})
 
 export default router;

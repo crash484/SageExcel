@@ -197,7 +197,7 @@ export default function History() {
                     initial={{ y: -30, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                 >
-                    Excel Analytics
+                    SageExcel
                 </motion.h1>
                 <motion.p
                     className="text-lg text-gray-600 dark:text-gray-300"

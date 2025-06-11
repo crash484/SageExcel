@@ -6,6 +6,7 @@ import User from "../models/user.model.js"
 import { verifyToken } from "../middleware/auth.middleware.js"
 import multer from "multer"
 import UploadedFile from "../models/UploadedFile.js"
+import SavedAnalysis from "../models/SavedAnalysis.js"
 
 const router = express.Router();
 dotenv.config();
@@ -239,5 +240,33 @@ router.put("/giveAdmin",verifyToken, async (req,res)=>{
       res.status(500).json({ message: "Server error" });
     }
 })
+
+//route to save analysis
+router.post('/saveAnalysis', verifyToken, async (req, res) => {
+  try {
+    const { chartType, selectedFields, chartOptions, fileId } = req.body;
+    const userId = req.user._id;
+    console.log(req.body)
+
+    if (!chartType || !selectedFields || !fileId) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    const newAnalysis = new SavedAnalysis({
+      userId,
+      fileId,
+      chartType,
+      selectedFields,
+      chartOptions
+    });
+
+    await newAnalysis.save();
+
+    res.status(201).json({ message: 'Analysis saved successfully', analysis: newAnalysis });
+  } catch (err) {
+    console.error('Save Analysis Error:', err);
+    res.status(500).json({ message: 'Server error saving analysis' });
+  }
+});
 
 export default router;

@@ -10,7 +10,7 @@ import History from './pages/History';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Visualize from './pages/Visualize';
-import LandingPage from './pages/LandingPage'
+import LandingPage  from './pages/LandingPage'
 import AdminDashboard from './pages/AdminDashboard'
 import { Toaster } from 'react-hot-toast'
 

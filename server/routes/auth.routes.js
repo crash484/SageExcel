@@ -267,6 +267,5 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
     console.error('Save Analysis Error:', err);
     res.status(500).json({ message: 'Server error saving analysis' });
   }
-});
-
+});  
 export default router;

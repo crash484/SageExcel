@@ -36,8 +36,8 @@ export default function InteractiveLandingPage() {
     const interval = setInterval(() => {
       chaseTimeRef.current += 50;
 
-      // After 8 seconds, start surrendering
-      if (chaseTimeRef.current > 8000 && !surrendered) {
+      // After 3.5 seconds, start surrendering
+      if (chaseTimeRef.current > 3500 && !surrendered) {
         setSurrendered(true);
         // Move to center and stop
         setAnalyticsPosition({ x: 400, y: 300 });

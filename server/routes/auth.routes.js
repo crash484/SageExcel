@@ -7,6 +7,7 @@ import { verifyToken } from "../middleware/auth.middleware.js"
 import multer from "multer"
 import UploadedFile from "../models/UploadedFile.js"
 import SavedAnalysis from "../models/SavedAnalysis.js"
+import { Save } from "lucide-react"
 
 const router = express.Router();
 dotenv.config();
@@ -121,14 +122,16 @@ router.post('/register',async (req,res)=>{
     }
   })
 
-  //path to get all files of a user and return user with all the files
+  //path to get all files of a user and return user with all the info
   router.get("/getFiles",verifyToken,async (req,res)=>{
     try{
-      const user = await User.findOne({ email: req.user.email }).populate('uploadedFiles')
+      const user = await User.findOne({ email: req.user.email })
+                                      .populate('uploadedFiles')
 
       if(!user){
         return res.status(404).json({ message: 'user not found' })
       }
+      console.log(user.savedAnalyses);
       return res.status(200).json({ user })
     }
     catch(err){
@@ -262,10 +265,60 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
 
     await newAnalysis.save();
 
+        // 2. Update user: push analysis ID to savedAnalyses
+    await User.findByIdAndUpdate(userId, {
+      $push: { savedAnalyses: newAnalysis._id }
+    });
+
+    // 3. Update uploaded file: push analysis ID to analyses
+    await UploadedFile.findByIdAndUpdate(fileId, {
+      $push: { analyses: newAnalysis._id }
+    });
+
     res.status(201).json({ message: 'Analysis saved successfully', analysis: newAnalysis });
   } catch (err) {
     console.error('Save Analysis Error:', err);
     res.status(500).json({ message: 'Server error saving analysis' });
   }
-});  
+});
+
+//route to get analysis
+router.get("/getAnalysis",verifyToken, async (req,res)=>{
+  try{
+    const userId = req.user._id;
+
+    const analyses = await SavedAnalysis.find({ userId }).populate("fileId","filename date size")
+                                                          .sort({ createdAt: -1 });
+    res.status(200).json({ analyses });
+  } catch (err) {
+    console.error("fetch analysis history error:",err)
+    res.status(500).json({ message: "Failed to fetch saved analyses" });
+  }
+})
+
+//route to return data to dashboard
+router.get("/getData", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const analyses = await SavedAnalysis.find({ userId })
+      .populate("fileId", "filename date") // get file name & date only
+      .sort({ createdAt: -1 });
+
+      const summary = analyses.map((analysis) => ({
+      analysisId: analysis._id,
+      chartTitle: analysis.chartOptions?.title || "Untitled Chart",
+      analysisDate: analysis.createdAt,
+      fileId: analysis.fileId?._id,
+      fileName: analysis.fileId?.filename || "Unknown File",
+      fileDate: analysis.fileId?.date,
+    }));
+     console.log(summary)
+    
+    res.status(200).json({ summary });
+  } catch (err) {
+    console.error("Dashboard summary error:", err);
+    res.status(500).json({ message: "Failed to fetch dashboard summary" });
+  }
+});
 export default router;

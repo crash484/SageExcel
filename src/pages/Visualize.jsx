@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import analyticsAnimation from './animation/Animation - 1749444335721.json';
 import * as THREE from 'three';
+import toast from 'react-hot-toast';
 
 ChartJS.register(...registerables);
 
@@ -499,10 +500,9 @@ export default function Visualize() {
             throw new Error("Failed to save analysis");
             }
 
-            alert("✅ Analysis saved successfully!");
+            toast.success("Analysis saved successfully!");
         } catch (err) {
-            console.error(err);
-            alert("❌ Error saving analysis.");
+            toast.error("Error saving analysis.");
         }
 };
 

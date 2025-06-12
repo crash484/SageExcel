@@ -249,7 +249,6 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
   try {
     const { chartType, selectedFields, chartOptions, fileId } = req.body;
     const userId = req.user._id;
-    console.log(req.body)
 
     if (!chartType || !selectedFields || !fileId) {
       return res.status(400).json({ message: 'Missing required fields.' });
@@ -287,7 +286,7 @@ router.get("/getAnalysis",verifyToken, async (req,res)=>{
   try{
     const userId = req.user._id;
 
-    const analyses = await SavedAnalysis.find({ userId }).populate("fileId","filename date size")
+    const analyses = await SavedAnalysis.find({ userId }).populate("")
                                                           .sort({ createdAt: -1 });
     res.status(200).json({ analyses });
   } catch (err) {
@@ -313,7 +312,6 @@ router.get("/getData", verifyToken, async (req, res) => {
       fileName: analysis.fileId?.filename || "Unknown File",
       fileDate: analysis.fileId?.date,
     }));
-     console.log(summary)
     
     res.status(200).json({ summary });
   } catch (err) {

@@ -13,12 +13,13 @@ import Visualize from './pages/Visualize';
 import LandingPage  from './pages/LandingPage'
 import AdminDashboard from './pages/AdminDashboard'
 import { Toaster } from 'react-hot-toast'
+import Charts from './pages/Charts'
 
 function App() {
     const { token } = useSelector((state) => state.auth)
 
     // DEVELOPMENT SETTING - SET TO false WHEN READY FOR AUTH
-    const DEV_BYPASS_AUTH = false
+    const DEV_BYPASS_AUTH = true
 
     return (
         <BrowserRouter>
@@ -49,6 +50,7 @@ function App() {
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="admin" element={<AdminDashboard />} />
+                    <Route path="Charts" element={<Charts />} />
                     {/* Add other protected routes here */}
                 </Route>
 

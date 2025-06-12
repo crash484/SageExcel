@@ -8,11 +8,10 @@ import jsPDF from 'jspdf';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import analyticsAnimation from './animation/Animation - 1749444335721.json';
-import * as THREE from 'three';
 import toast from 'react-hot-toast';
 
-ChartJS.register(...registerables);
 
+ChartJS.register(...registerables);
 
 export default function Visualize() {
     const location = useLocation();
@@ -32,7 +31,6 @@ export default function Visualize() {
     const [exportFormat, setExportFormat] = useState('png');
 
     const chartRef = useRef(null);
-    const chart3DRef = useRef(null);
 
     useEffect(() => {
         const getFile = async () => {
@@ -69,7 +67,7 @@ export default function Visualize() {
             }
         };
         getFile();
-    }, []);
+    }, [fileId, token]);
 
     const groupByAndAggregate = (groupCol, valueCol, operation = 'sum') => {
         const grouped = {};
@@ -125,68 +123,34 @@ export default function Visualize() {
 
     const downloadChart = () => {
         const safeTitle = (chartTitle || chartType).replace(/[^a-z0-9]/gi, ' ').toLowerCase();
+        const chartInstance = chartRef.current;
+        const canvas = chartInstance?.canvas;
 
-        if (chartType.startsWith('3d-')) {
-            // Handle 3D chart export
-            if (!chart3DRef.current) {
-                console.error('3D Chart renderer not found');
-                return;
-            }
+        if (!canvas) {
+            console.error('Canvas not found');
+            return;
+        }
 
-            const canvas = chart3DRef.current.domElement;
-            const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/png');
 
-            if (exportFormat === 'png') {
-                const link = document.createElement('a');
-                link.download = `${safeTitle}_3d.png`;
-                link.href = imgData;
-                link.click();
-            } else if (exportFormat === 'pdf') {
-                const pdf = new jsPDF();
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const imgProps = pdf.getImageProperties(imgData);
-                const ratio = imgProps.width / imgProps.height;
-                const pdfWidth = pageWidth * 0.9;
-                const pdfHeight = pdfWidth / ratio;
-                const x = (pageWidth - pdfWidth) / 2;
-                const y = 20;
+        if (exportFormat === 'png') {
+            const link = document.createElement('a');
+            link.download = `${safeTitle}.png`;
+            link.href = imgData;
+            link.click();
+        } else if (exportFormat === 'pdf') {
+            const pdf = new jsPDF();
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const imgProps = pdf.getImageProperties(imgData);
+            const ratio = imgProps.width / imgProps.height;
+            const pdfWidth = pageWidth * 0.9;
+            const pdfHeight = pdfWidth / ratio;
+            const x = (pageWidth - pdfWidth) / 2;
+            const y = 20;
 
-                pdf.text(chartTitle, x, 15);
-                pdf.addImage(imgData, 'PNG', x, y, pdfWidth, pdfHeight);
-                pdf.save(`${safeTitle}_3d.pdf`);
-            }
-        } else {
-            // Handle 2D chart export (existing functionality)
-            const chartInstance = chartRef.current;
-            const canvas = chartInstance?.canvas;
-
-            if (!canvas) {
-                console.error('Canvas not found');
-                return;
-            }
-
-            const imgData = canvas.toDataURL('image/png');
-
-            if (exportFormat === 'png') {
-                const link = document.createElement('a');
-                link.download = `${safeTitle}.png`;
-                link.href = imgData;
-                link.click();
-            } else if (exportFormat === 'pdf') {
-                const pdf = new jsPDF();
-                const pageWidth = pdf.internal.pageSize.getWidth();
-
-                const imgProps = pdf.getImageProperties(imgData);
-                const ratio = imgProps.width / imgProps.height;
-                const pdfWidth = pageWidth * 0.9;
-                const pdfHeight = pdfWidth / ratio;
-                const x = (pageWidth - pdfWidth) / 2;
-                const y = 20;
-
-                pdf.text(chartTitle, x, 15);
-                pdf.addImage(imgData, 'PNG', x, y, pdfWidth, pdfHeight);
-                pdf.save(`${safeTitle}.pdf`);
-            }
+            pdf.text(chartTitle, x, 15);
+            pdf.addImage(imgData, 'PNG', x, y, pdfWidth, pdfHeight);
+            pdf.save(`${safeTitle}.pdf`);
         }
     };
 
@@ -260,8 +224,6 @@ export default function Visualize() {
         setChartTitle('My Chart');
     };
 
-    const is3DChart = chartType.startsWith('3d-');
-
     return (
         <div className="min-h-screen bg-gradient-to-tr from-gray-100 via-indigo-100 to-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
             <div className="max-w-7xl mx-auto">
@@ -273,7 +235,7 @@ export default function Visualize() {
                 >
                     <h1 className="text-5xl font-extrabold text-indigo-700 dark:text-indigo-300">📊 Data Canvas</h1>
                     <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
-                        Explore insights from your Excel files with interactive 2D & 3D visualizations.
+                        Explore insights from your Excel files with interactive visualizations.
                     </p>
                 </motion.div>
 
@@ -294,28 +256,13 @@ export default function Visualize() {
                                 <label className="block text-sm text-gray-600 dark:text-gray-300 mt-2">Chart Type</label>
                                 <select value={chartType} onChange={e => setChartType(e.target.value)}
                                     className="w-full px-3 py-2 rounded-md bg-white dark:bg-gray-700 border dark:border-gray-600">
-                                    <optgroup label="2D Charts">
-                                        <option value="bar">📊 Bar</option>
-                                        <option value="line">📈 Line</option>
-                                        <option value="pie">🥧 Pie</option>
-                                        <option value="doughnut">🍩 Doughnut</option>
-                                        <option value="radar">📉 Radar</option>
-                                        <option value="scatter">🔬 Scatter</option>
-                                    </optgroup>
-                                    <optgroup label="3D Charts">
-                                        <option value="3d-bar">🏗️ 3D Bar</option>
-                                        <option value="3d-pie">🎂 3D Pie</option>
-                                        <option value="3d-scatter">🌌 3D Scatter</option>
-                                    </optgroup>
+                                    <option value="bar">📊 Bar</option>
+                                    <option value="line">📈 Line</option>
+                                    <option value="pie">🥧 Pie</option>
+                                    <option value="doughnut">🍩 Doughnut</option>
+                                    <option value="radar">📉 Radar</option>
+                                    <option value="scatter">🔬 Scatter</option>
                                 </select>
-
-                                {is3DChart && (
-                                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                                        <p className="text-sm text-blue-700 dark:text-blue-300">
-                                            💡 <strong>3D Interaction:</strong> Click and drag to rotate the 3D chart
-                                        </p>
-                                    </div>
-                                )}
 
                                 <label className="block text-sm text-gray-600 dark:text-gray-300 mt-2">Select X-Axis</label>
                                 <select value={xAxis} onChange={e => setXAxis(e.target.value)}
@@ -323,7 +270,7 @@ export default function Visualize() {
                                     {headers.map((h, i) => <option key={i}>{h}</option>)}
                                 </select>
 
-                                {chartType !== 'pie' && chartType !== '3d-pie' && (
+                                {chartType !== 'pie' && (
                                     <>
                                         <label className="block text-sm text-gray-600 dark:text-gray-300 mt-2">Select Y-Axis</label>
                                         <select value={yAxis} onChange={e => setYAxis(e.target.value)}
@@ -383,21 +330,7 @@ export default function Visualize() {
                                 transition={{ duration: 0.5 }}
                                 className="flex-1 min-h-[500px]"
                             >
-                                {is3DChart ? (
-                                    <>
-                                        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                                            {chartTitle} (3D Interactive)
-                                        </h3>
-                                        <Chart3D
-                                            data={generateChartData()}
-                                            chartType={chartType}
-                                            title={chartTitle}
-                                            onRef={(renderer) => { chart3DRef.current = renderer; }}
-                                        />
-                                    </>
-                                ) : (
-                                    <Chart ref={chartRef} type={chartType} data={generateChartData()} options={chartOptions} />
-                                )}
+                                <Chart ref={chartRef} type={chartType} data={generateChartData()} options={chartOptions} />
                             </motion.div>
                         </motion.div>
                     </div>

@@ -7,50 +7,69 @@ import { FaFileAlt, FaChartBar, FaSave } from 'react-icons/fa';
 
 const Dashboard = () => {
     const token = useSelector(selectCurrentToken);
-    const [fileCount,setFileCount]=useState(0);
-    const [file,setFile] = useState([{
-        "filename":"",
-        "date":""
-    }])
+    const [file, setFile] = useState([]);
+    const [analysis, setAnalysis] = useState([]);
 
     useEffect(() => {
         const getInfo=(async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/getFiles', {
+                const response = await fetch('http://localhost:5000/api/auth/getData', {
                 method: 'GET',
                 headers: { 
                     'Authorization': `Bearer ${token}`
                  }
             });
             const data = await response.json();
-            if(response.ok){
-                const user= data.user;
-                const allFiles = user.uploadedFiles;
-                const fileData = allFiles.map(file =>({
-                    filename: file.filename,
-                    date: file.date
-                }))
-                setFile(fileData);
-            }
-            } catch (error) {
-                console.error(error);
-            }
-        });
+                 if (response.ok) {
+                    const summary = data.summary;
+
+                    // Separate file and analysis entries
+                    const uniqueFiles = new Map();
+                    const analysisData = [];
+
+                    summary.forEach((item) => {
+                    // Deduplicate files by ID
+                    if (!uniqueFiles.has(item.fileId.toString())) {
+                        uniqueFiles.set(item.fileId.toString(), {
+                        filename: item.fileName,
+                        date: item.fileDate,
+                        });
+                    }
+
+                    analysisData.push({
+                        chartTitle: item.chartTitle,
+                        date: item.analysisDate,
+                        fileName: item.fileName,
+                    });
+                    });
+
+                    setFile(Array.from(uniqueFiles.values()));
+                    setAnalysis(analysisData);
+                }
+                } catch (error) {
+                console.error('Error fetching dashboard summary:', error);
+                }
+            })
         getInfo();
 
     }, [token]);
 
-    const stats = [
-        { icon: <FaFileAlt />, label: 'Files Uploaded', value: file.length },
-        { icon: <FaChartBar />, label: 'Analyses Performed', value: 12 },
-        { icon: <FaSave />, label: 'Saved Charts', value: 8 },
-    ];
+            const stats = [
+            { icon: <FaFileAlt />, label: 'Files Uploaded', value: file.length },
+            { icon: <FaChartBar />, label: 'Analyses Performed', value: analysis.length },
+            { icon: <FaSave />, label: 'Saved Charts', value: analysis.length }, // same here
+            ];
 
-        const activities = file.slice(-3).reverse().map(f => ({
-            action: `Uploaded ${f.filename}`,
-            time: new Date(f.date).toLocaleString(),
-        }));
-    
+            const activities = [
+            ...file.slice(-2).reverse().map(f => ({
+                action: `Uploaded ${f.filename}`,
+                time: new Date(f.date).toLocaleString(),
+            })),
+            ...analysis.slice(-1).reverse().map(a => ({
+                action: `Saved chart "${a.chartTitle}" for ${a.fileName}`,
+                time: new Date(a.date).toLocaleString(),
+            }))
+            ];
 
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">

@@ -9,6 +9,8 @@ import jsPDF from 'jspdf';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import analyticsAnimation from './animation/Animation - 1749444335721.json';
+import toast from 'react-hot-toast';
+
 
 ChartJS.register(...registerables);
 
@@ -316,6 +318,49 @@ export default function Visualize() {
         }
     };
 
+    const handleSaveAnalysis = async () => {
+        const selectedFields = [];
+
+        if (chartType === 'pie' || chartType === 'doughnut' || chartType === '3d-pie') {
+            selectedFields.push(groupBy, yAxis);
+        } else if (chartType === '3d-scatter') {
+            // For now just use 3 fields (expand logic as needed)
+            selectedFields.push(groupBy, xAxis, yAxis);
+        } else {
+            selectedFields.push(xAxis, yAxis);
+        }
+
+        const chartOptions = {
+            title: chartTitle,
+            aggregation,
+            colorTheme: "default", // optional
+        };
+
+        try {
+            const response = await fetch("http://localhost:5000/api/auth/saveAnalysis", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                chartType,
+                selectedFields,
+                chartOptions,
+                fileId,
+            }),
+            });
+
+            if (!response.ok) {
+            throw new Error("Failed to save analysis");
+            }
+
+            toast.success("Analysis saved successfully!");
+        } catch (err) {
+            toast.error("Error saving analysis.");
+        }
+};
+
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -471,6 +516,12 @@ export default function Visualize() {
                                         <FiDownload className="inline mr-1" /> Export
                                     </button>
                                 </div>
+                                    <button
+                                        onClick={handleSaveAnalysis}
+                                        className="w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 mt-2"
+                                        >
+                                        💾 Save Analysis
+                                    </button>
 
                                 <button onClick={handleReset} className="w-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg py-2 hover:bg-gray-400 mt-2">
                                     <FiRefreshCw className="inline mr-1" /> Reset

@@ -33,6 +33,7 @@ export default function Visualize() {
     const [exportFormat, setExportFormat] = useState('png');
 
     const chartRef = useRef(null);
+    const plotlyRef = useRef(null);
 
     // Check if current chart type is 3D
     const is3DChart = ['bar3d', 'scatter3d', 'surface3d'].includes(chartType);

@@ -36,6 +36,15 @@ const Dashboard = () => {
         getInfo();
         }, [token]);
 
+        const formatDate = (date) =>
+        new Date(date).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
             const stats = [
             { icon: <FaFileAlt />, label: 'Files Uploaded', value: file.length },
             { icon: <FaChartBar />, label: 'Analyses Performed', value: analysis.length },
@@ -45,11 +54,11 @@ const Dashboard = () => {
             const activities = [
             ...file.slice(-2).reverse().map(f => ({
                 action: `Uploaded ${f.filename}`,
-                time: new Date(f.date).toLocaleString(),
+                time: formatDate(f.date),
             })),
             ...analysis.slice(-1).reverse().map(a => ({
                 action: `Saved chart "${a.chartTitle}" for ${a.fileName}`,
-                time: new Date(a.date).toLocaleString(),
+                time: formatDate(a.date),
             }))
             ];
 

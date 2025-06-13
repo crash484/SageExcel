@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { selectCurrentToken } from '../store/authSlice';
 import { useSelector } from 'react-redux';
-import SendRequest from '../api/SendRequest';
 import { FiTrash2, FiEye, FiBarChart2, FiPieChart, FiTrendingUp } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { motion } from "framer-motion";
@@ -26,7 +25,6 @@ const Charts = ()=> {
                     });
                     const data = await response.json();
                     if (response.ok) {
-                        console.log(data)
                         setVisuals(data.analysis);
                         setIsLoading(false);
                         setIsTokenValid(true);
@@ -45,7 +43,7 @@ const Charts = ()=> {
 
     const handleDelete = async (id) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/auth/deleteVisual/${id}`, {
+            const response = await fetch(`http://localhost:5000/api/auth/analysis/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -65,7 +63,7 @@ const Charts = ()=> {
     };
 
     const handleView = (id) => {
-        navigate(`/visualize/detail`, { state: { id, token } });
+        navigate(`/chart/${id}`);
     };
 
     const formatDate = (date) =>
@@ -142,7 +140,7 @@ const Charts = ()=> {
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Created: {formatDate(vis.createdAt)}</p>
                             <div className="flex justify-between mt-4">
-                                <button onClick={() => handleView(vis.id || vis._id)} title="View Visualization">
+                                <button onClick={() => handleView(vis._id)} title="View Visualization">
                                     <FiEye className="text-green-600 hover:text-green-800 text-xl" />
                                 </button>
                                 <button onClick={() => handleDelete(vis.id || vis._id)} title="Delete Visualization">

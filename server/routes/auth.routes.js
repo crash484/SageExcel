@@ -7,9 +7,7 @@ import { verifyToken } from "../middleware/auth.middleware.js"
 import multer from "multer"
 import UploadedFile from "../models/UploadedFile.js"
 import SavedAnalysis from "../models/SavedAnalysis.js"
-import mongoose from "mongoose"
-import { Save } from "lucide-react"
-import { Upload } from "lucide-react"
+
 
 const router = express.Router();
 dotenv.config();
@@ -265,7 +263,6 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
     });
 
     await newAnalysis.save();
-
         // 2. Update user: push analysis ID to savedAnalysis
     await User.findByIdAndUpdate(userId, {
       $push: { savedAnalyses: newAnalysis._id }
@@ -326,6 +323,50 @@ router.get("/getData", verifyToken, async (req, res) => {
   } catch (err) {
     console.error("Dashboard summary error:", err);
     res.status(500).json({ message: "Failed to fetch dashboard summary" });
+  }
+});
+
+//route to get one chart
+router.get('/analysis/:id', verifyToken, async (req, res) => {
+  try {
+    const chart = await SavedAnalysis.findById(req.params.id);
+    if (!chart) return res.status(404).json({ message: 'Chart not found' });
+
+    res.status(200).json(chart);
+  } catch (err) {
+    res.status(500).json({ message: 'Error retrieving chart' });
+  }
+});
+
+ //route to delete a analysis and its references
+ router.delete('/analysis/:id', verifyToken, async (req, res) => {
+  const analysisId = req.params.id;
+
+  try {
+    // 1. Find the analysis
+    const analysis = await SavedAnalysis.findById(analysisId);
+    if (!analysis) {
+      return res.status(404).json({ message: 'Analysis not found' });
+    }
+    const userId = analysis.userId;
+    const fileId = analysis.fileId;
+
+    // 2. Delete the analysis
+    await SavedAnalysis.findByIdAndDelete(analysisId);
+
+    // 3. Remove references from User and File
+    await User.findByIdAndUpdate(userId, {
+      $pull: { savedAnalyses: analysisId }
+    });
+
+    await UploadedFile.findByIdAndUpdate(fileId, {
+      $pull: { analyses: analysisId }
+    });
+
+    res.json({ message: 'Analysis deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 export default router;

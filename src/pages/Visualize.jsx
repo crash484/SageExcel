@@ -344,6 +344,7 @@ export default function Visualize() {
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
+                chartTitle,
                 chartType,
                 selectedFields,
                 chartOptions,

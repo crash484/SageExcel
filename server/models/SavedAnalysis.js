@@ -4,6 +4,8 @@ const SavedAnalysisSchema = new mongoose.Schema(
                 userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
                 fileId: { type: mongoose.Schema.Types.ObjectId, ref: 'UploadedFile' },
 
+                chartTitle: String,
+
                 chartType: String, // e.g., 'bar', 'pie', '3d-scatter'
 
                 selectedFields: [String], // Can be ['Product', 'Revenue'] or ['X', 'Y', 'Z']

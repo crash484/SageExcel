@@ -51,6 +51,7 @@ const DashboardLayout = () => {
                             <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
                             <NavLink to="/upload" className={navLinkClass}>Upload</NavLink>
                             <NavLink to="/history" className={navLinkClass}>History</NavLink>
+                            <NavLink to="/charts" className = {navLinkClass}>Charts</NavLink>
                         </div>
                     </div>
 

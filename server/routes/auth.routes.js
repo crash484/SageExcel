@@ -7,7 +7,9 @@ import { verifyToken } from "../middleware/auth.middleware.js"
 import multer from "multer"
 import UploadedFile from "../models/UploadedFile.js"
 import SavedAnalysis from "../models/SavedAnalysis.js"
+import mongoose from "mongoose"
 import { Save } from "lucide-react"
+import { Upload } from "lucide-react"
 
 const router = express.Router();
 dotenv.config();
@@ -117,7 +119,7 @@ router.post('/register',async (req,res)=>{
       const user = await User.findOne({ email: req.user.email });
       return res.status(200).json({ user: user })
     }catch(err){
-      console.log(err)
+      console.error(err)
       return res.status(500).json({message: "server error" })
     }
   })
@@ -131,7 +133,6 @@ router.post('/register',async (req,res)=>{
       if(!user){
         return res.status(404).json({ message: 'user not found' })
       }
-      console.log(user.savedAnalyses);
       return res.status(200).json({ user })
     }
     catch(err){
@@ -247,9 +248,8 @@ router.put("/giveAdmin",verifyToken, async (req,res)=>{
 //route to save analysis
 router.post('/saveAnalysis', verifyToken, async (req, res) => {
   try {
-    const { chartType, selectedFields, chartOptions, fileId } = req.body;
+    const { chartTitle, chartType, selectedFields, chartOptions, fileId } = req.body;
     const userId = req.user._id;
-    console.log(req.body)
 
     if (!chartType || !selectedFields || !fileId) {
       return res.status(400).json({ message: 'Missing required fields.' });
@@ -258,6 +258,7 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
     const newAnalysis = new SavedAnalysis({
       userId,
       fileId,
+      chartTitle,
       chartType,
       selectedFields,
       chartOptions
@@ -265,12 +266,12 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
 
     await newAnalysis.save();
 
-        // 2. Update user: push analysis ID to savedAnalyses
+        // 2. Update user: push analysis ID to savedAnalysis
     await User.findByIdAndUpdate(userId, {
       $push: { savedAnalyses: newAnalysis._id }
     });
 
-    // 3. Update uploaded file: push analysis ID to analyses
+    // 3. Update uploaded file: push analysis ID to analysis
     await UploadedFile.findByIdAndUpdate(fileId, {
       $push: { analyses: newAnalysis._id }
     });
@@ -282,40 +283,46 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
   }
 });
 
-//route to get analysis
-router.get("/getAnalysis",verifyToken, async (req,res)=>{
-  try{
-    const userId = req.user._id;
-
-    const analyses = await SavedAnalysis.find({ userId }).populate("fileId","filename date size")
-                                                          .sort({ createdAt: -1 });
-    res.status(200).json({ analyses });
-  } catch (err) {
-    console.error("fetch analysis history error:",err)
-    res.status(500).json({ message: "Failed to fetch saved analyses" });
-  }
-})
-
-//route to return data to dashboard
-router.get("/getData", verifyToken, async (req, res) => {
+router.get("/getAnalysis", verifyToken, async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const analyses = await SavedAnalysis.find({ userId })
-      .populate("fileId", "filename date") // get file name & date only
-      .sort({ createdAt: -1 });
+    const analysis = await SavedAnalysis.find({ userId });
 
-      const summary = analyses.map((analysis) => ({
-      analysisId: analysis._id,
-      chartTitle: analysis.chartOptions?.title || "Untitled Chart",
-      analysisDate: analysis.createdAt,
-      fileId: analysis.fileId?._id,
-      fileName: analysis.fileId?.filename || "Unknown File",
-      fileDate: analysis.fileId?.date,
-    }));
-     console.log(summary)
-    
-    res.status(200).json({ summary });
+
+    res.status(200).json({ analysis });
+
+  } catch (err) {
+    console.error("fetch analysis history error:", err);
+    res.status(500).json({ message: "Failed to fetch saved analyses" });
+  }
+});
+
+router.get("/getData", verifyToken, async (req, res) => {
+  try {
+    // Step 1: Fetch all user files
+  const user = await User.findOne({ email: req.user.email })
+  .populate({
+    path: "uploadedFiles",
+    select: "_id filename date" // only get _id and filename, no full data
+  })
+  .populate({
+    path: 'savedAnalyses',
+    select: "_id chartTitle createdAt"
+  })
+  
+   //console.log(user)
+   const files = user.uploadedFiles;
+
+    // Step 2: Fetch all analyses of that user
+    const analyses = user.savedAnalyses;
+    //console.log(analyses)
+
+   
+    res.status(200).json({
+      files: files,
+      analyses: analyses,
+  });
   } catch (err) {
     console.error("Dashboard summary error:", err);
     res.status(500).json({ message: "Failed to fetch dashboard summary" });

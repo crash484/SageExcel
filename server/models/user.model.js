@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
     savedAnalyses: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Analysis"
+            ref: "SavedAnalysis"
         }
     ],
 });

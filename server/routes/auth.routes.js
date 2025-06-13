@@ -263,7 +263,6 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
     });
 
     await newAnalysis.save();
-
         // 2. Update user: push analysis ID to savedAnalysis
     await User.findByIdAndUpdate(userId, {
       $push: { savedAnalyses: newAnalysis._id }
@@ -332,9 +331,6 @@ router.get('/analysis/:id', verifyToken, async (req, res) => {
   try {
     const chart = await SavedAnalysis.findById(req.params.id);
     if (!chart) return res.status(404).json({ message: 'Chart not found' });
-    console.log(chart);
-    // Mocked or fetched from the original file:
-    // const dataPoints = await getParsedData(chart.fileId); // replace with your logic
 
     res.status(200).json(chart);
   } catch (err) {
@@ -352,7 +348,6 @@ router.get('/analysis/:id', verifyToken, async (req, res) => {
     if (!analysis) {
       return res.status(404).json({ message: 'Analysis not found' });
     }
-    console.log(analysisId)
     const userId = analysis.userId;
     const fileId = analysis.fileId;
 

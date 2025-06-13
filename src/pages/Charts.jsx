@@ -43,7 +43,7 @@ const Charts = ()=> {
 
     const handleDelete = async (id) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/auth/deleteVisual/${id}`, {
+            const response = await fetch(`http://localhost:5000/api/auth/analysis/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`

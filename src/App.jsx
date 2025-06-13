@@ -14,6 +14,7 @@ import LandingPage  from './pages/LandingPage';
 import AdminDashboard from './pages/AdminDashboard';
 import { Toaster } from 'react-hot-toast';
 import Charts from './pages/Charts';
+import ChartViewer from './pages/ChartViewer';
 
 function App() {
     const { token } = useSelector((state) => state.auth)
@@ -51,6 +52,7 @@ function App() {
                     <Route path="settings" element={<Settings />} />
                     <Route path="admin" element={<AdminDashboard />} />
                     <Route path="charts" element={<Charts />} />
+                    <Route path="/chart/:chartId" element={<ChartViewer />} />
                     {/* Add other protected routes here */}
                 </Route>
 

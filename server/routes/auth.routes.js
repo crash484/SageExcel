@@ -268,12 +268,12 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
 
         // 2. Update user: push analysis ID to savedAnalysis
     await User.findByIdAndUpdate(userId, {
-      $push: { savedAnalysis: newAnalysis._id }
+      $push: { savedAnalyses: newAnalysis._id }
     });
 
     // 3. Update uploaded file: push analysis ID to analysis
     await UploadedFile.findByIdAndUpdate(fileId, {
-      $push: { analysis: newAnalysis._id }
+      $push: { analyses: newAnalysis._id }
     });
 
     res.status(201).json({ message: 'Analysis saved successfully', analysis: newAnalysis });
@@ -289,7 +289,6 @@ router.get("/getAnalysis", verifyToken, async (req, res) => {
 
     const analysis = await SavedAnalysis.find({ userId });
 
-    console.log(analysis)
 
     res.status(200).json({ analysis });
 
@@ -305,39 +304,25 @@ router.get("/getData", verifyToken, async (req, res) => {
   const user = await User.findOne({ email: req.user.email })
   .populate({
     path: "uploadedFiles",
-    select: "_id filename date analyses" // only get _id and filename, no full data
+    select: "_id filename date" // only get _id and filename, no full data
+  })
+  .populate({
+    path: 'savedAnalyses',
+    select: "_id chartTitle createdAt"
   })
   
-   console.log(user)
+   //console.log(user)
    const files = user.uploadedFiles;
 
     // Step 2: Fetch all analyses of that user
     const analyses = user.savedAnalyses;
-    console.log(analyses)
-    // Step 3: Build a map for quick lookup
-    const analysisMap = new Map();
-    analyses.forEach((a) => {
-      const key = a.fileId.toString();
-      if (!analysisMap.has(key)) analysisMap.set(key, []);
-      analysisMap.get(key).push(a);
-    });
+    //console.log(analyses)
 
-    // Step 4: Build summary per file (even if it has no analysis)
-    const summary = files.map((file) => {
-      const fileAnalyses = analysisMap.get(file._id.toString()) || [];
-      return {
-        fileId: file._id,
-        fileName: file.filename,
-        fileDate: file.date,
-        analyses: fileAnalyses.map((a) => ({
-          analysisId: a._id,
-          chartTitle: a.chartOptions?.title || "Untitled Chart",
-          analysisDate: a.createdAt
-        }))
-      };
-    });
-    //console.log(summary)
-    res.status(200).json({summary});
+   
+    res.status(200).json({
+      files: files,
+      analyses: analyses,
+  });
   } catch (err) {
     console.error("Dashboard summary error:", err);
     res.status(500).json({ message: "Failed to fetch dashboard summary" });

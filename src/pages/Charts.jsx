@@ -2,71 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { selectCurrentToken } from '../store/authSlice';
 import { useSelector } from 'react-redux';
-import SendRequest from '../../src/api/SendRequest';
-import { FiTrash2, FiEye, FiBarChart2, FiPieChart, FiLineChart } from 'react-icons/fi';
+import SendRequest from '../api/SendRequest';
+import { FiTrash2, FiEye, FiBarChart2, FiPieChart, FiTrendingUp } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { motion } from "framer-motion";
 
-const DEV_MODE = false;
 
-export default function Charts() {
+const Charts = ()=> {
     const navigate = useNavigate();
     const token = useSelector(selectCurrentToken);
     const [visuals, setVisuals] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isTokenValid, setIsTokenValid] = useState(DEV_MODE ? true : false);
+    const [isTokenValid, setIsTokenValid] = useState(false);
 
-    const mockVisuals = [
-        {
-            id: '1',
-            title: 'Revenue by Region',
-            chartType: 'bar',
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: '2',
-            title: 'Customer Ratings',
-            chartType: 'pie',
-            createdAt: new Date(Date.now() - 86400000).toISOString()
-        },
-        {
-            id: '3',
-            title: 'Inventory Trend',
-            chartType: 'line',
-            createdAt: new Date(Date.now() - 172800000).toISOString()
-        }
-    ];
-
+   
     useEffect(() => {
         const fetchVisuals = async () => {
             try {
-                if (!DEV_MODE) {
-                    const authData = await SendRequest(token);
-                    setIsTokenValid(true);
-                    console.log('Token verification:', authData);
-                } else {
-                    console.log('DEV MODE: Skipping token check');
-                }
-
-                if (DEV_MODE) {
-                    setTimeout(() => {
-                        setVisuals(mockVisuals);
-                        setIsLoading(false);
-                    }, 500);
-                } else {
-                    const response = await fetch('http://localhost:5000/api/auth/getVisuals', {
+                    const response = await fetch('http://localhost:5000/api/auth/getAnalysis', {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     });
                     const data = await response.json();
                     if (response.ok) {
-                        setVisuals(data.visuals);
+                        console.log(data)
+                        setVisuals(data.analysis);
                         setIsLoading(false);
+                        setIsTokenValid(true);
                     } else {
+                        setIsLoading(true);
                         throw new Error(data.message || "Failed to fetch visualizations");
                     }
-                }
             } catch (err) {
                 toast.error(err.message || 'Error loading visualizations');
                 setIsLoading(false);
@@ -77,12 +44,6 @@ export default function Charts() {
     }, [token]);
 
     const handleDelete = async (id) => {
-        if (DEV_MODE) {
-            setVisuals(prev => prev.filter(vis => vis.id !== id));
-            toast.success('[DEV] Visualization deleted');
-            return;
-        }
-
         try {
             const response = await fetch(`http://localhost:5000/api/auth/deleteVisual/${id}`, {
                 method: 'DELETE',
@@ -125,7 +86,7 @@ export default function Charts() {
         }
     };
 
-    if (!DEV_MODE && !isTokenValid) {
+    if (!isTokenValid) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
@@ -199,3 +160,5 @@ export default function Charts() {
         </div>
     );
 }
+
+export default Charts;

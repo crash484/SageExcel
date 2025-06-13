@@ -11,48 +11,30 @@ const Dashboard = () => {
     const [analysis, setAnalysis] = useState([]);
 
     useEffect(() => {
-        const getInfo=(async () => {
+        const getInfo = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/getData', {
+            const response = await fetch('http://localhost:5000/api/auth/getData', {
                 method: 'GET',
-                headers: { 
-                    'Authorization': `Bearer ${token}`
-                 }
+                headers: {
+                'Authorization': `Bearer ${token}`
+                }
             });
             const data = await response.json();
-                 if (response.ok) {
-                    const summary = data.summary;
 
-                    // Separate file and analysis entries
-                    const uniqueFiles = new Map();
-                    const analysisData = [];
+            if (response.ok) {
+                // Directly set files and analyses
+                setFile(data.files || []);
+                setAnalysis(data.analyses || []);
+            } else {
+                console.error('Fetch error:', data.message);
+            }
+            } catch (error) {
+            console.error('Error fetching dashboard summary:', error);
+            }
+        };
 
-                    summary.forEach((item) => {
-                    // Deduplicate files by ID
-                    if (!uniqueFiles.has(item.fileId.toString())) {
-                        uniqueFiles.set(item.fileId.toString(), {
-                        filename: item.fileName,
-                        date: item.fileDate,
-                        });
-                    }
-
-                    analysisData.push({
-                        chartTitle: item.chartTitle,
-                        date: item.analysisDate,
-                        fileName: item.fileName,
-                    });
-                    });
-
-                    setFile(Array.from(uniqueFiles.values()));
-                    setAnalysis(analysisData);
-                }
-                } catch (error) {
-                console.error('Error fetching dashboard summary:', error);
-                }
-            })
         getInfo();
-
-    }, [token]);
+        }, [token]);
 
             const stats = [
             { icon: <FaFileAlt />, label: 'Files Uploaded', value: file.length },

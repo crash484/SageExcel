@@ -1,19 +1,19 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import DashboardLayout from './components/Layout/DashboardLayout'
-import Dashboard from './pages/Dashboard'
-import Login from './components/Auth/Login'
-import Register from './components/Auth/Register'
+import { useSelector } from 'react-redux';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import DashboardLayout from './components/Layout/DashboardLayout';
+import Dashboard from './pages/Dashboard';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 import Upload from './pages/Upload';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Visualize from './pages/Visualize';
-import LandingPage  from './pages/LandingPage'
-import AdminDashboard from './pages/AdminDashboard'
-import { Toaster } from 'react-hot-toast'
-import Charts from './pages/Charts'
+import LandingPage  from './pages/LandingPage';
+import AdminDashboard from './pages/AdminDashboard';
+import { Toaster } from 'react-hot-toast';
+import Charts from './pages/Charts';
 
 function App() {
     const { token } = useSelector((state) => state.auth)
@@ -50,7 +50,7 @@ function App() {
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="admin" element={<AdminDashboard />} />
-                    <Route path="Charts" element={<Charts />} />
+                    <Route path="charts" element={<Charts />} />
                     {/* Add other protected routes here */}
                 </Route>
 

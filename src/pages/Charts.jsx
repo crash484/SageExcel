@@ -7,31 +7,31 @@ import { toast } from 'react-hot-toast';
 import { motion } from "framer-motion";
 
 
-const Charts = ()=> {
+const Charts = () => {
     const navigate = useNavigate();
     const token = useSelector(selectCurrentToken);
     const [visuals, setVisuals] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isTokenValid, setIsTokenValid] = useState(false);
 
-   
+
     useEffect(() => {
         const fetchVisuals = async () => {
             try {
-                    const response = await fetch('http://localhost:5000/api/auth/getAnalysis', {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    });
-                    const data = await response.json();
-                    if (response.ok) {
-                        setVisuals(data.analysis);
-                        setIsLoading(false);
-                        setIsTokenValid(true);
-                    } else {
-                        setIsLoading(true);
-                        throw new Error(data.message || "Failed to fetch visualizations");
+                const response = await fetch('http://localhost:5000/api/auth/getAnalysis', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setVisuals(data.analysis);
+                    setIsLoading(false);
+                    setIsTokenValid(true);
+                } else {
+                    setIsLoading(true);
+                    throw new Error(data.message || "Failed to fetch visualizations");
+                }
             } catch (err) {
                 toast.error(err.message || 'Error loading visualizations');
                 setIsLoading(false);
@@ -77,13 +77,22 @@ const Charts = ()=> {
 
     const renderIcon = (type) => {
         switch (type) {
-            case 'bar': return <FiBarChart2 className="text-indigo-600 text-2xl" />;
-            case 'line': return <FiLineChart className="text-blue-600 text-2xl" />;
-            case 'pie': return <FiPieChart className="text-pink-600 text-2xl" />;
-            default: return <FiBarChart2 className="text-gray-500 text-2xl" />;
+            case 'bar':
+                return <FiBarChart2 className="text-indigo-600 text-2xl" />;
+            case 'line':
+                return <FiTrendingUp className="text-blue-600 text-2xl" />;
+            case 'pie':
+                return <FiPieChart className="text-pink-600 text-2xl" />;
+            case 'area':
+                return <FiTrendingUp className="text-green-600 text-2xl" />;
+            case 'scatter':
+                return <FiBarChart2 className="text-purple-600 text-2xl" />;
+            case 'doughnut':
+                return <FiPieChart className="text-orange-600 text-2xl" />;
+            default:
+                return <FiBarChart2 className="text-gray-500 text-2xl" />;
         }
-    };
-
+    }
     if (!isTokenValid) {
         return (
             <div className="min-h-screen flex items-center justify-center">

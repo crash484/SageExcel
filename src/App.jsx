@@ -10,7 +10,7 @@ import History from './pages/History';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Visualize from './pages/Visualize';
-import LandingPage  from './pages/LandingPage';
+import LandingPage from './pages/LandingPage';
 import AdminDashboard from './pages/AdminDashboard';
 import { Toaster } from 'react-hot-toast';
 import Charts from './pages/Charts';
@@ -20,7 +20,7 @@ function App() {
     const { token } = useSelector((state) => state.auth)
 
     // DEVELOPMENT SETTING - SET TO false WHEN READY FOR AUTH
-    const DEV_BYPASS_AUTH = true
+    const DEV_BYPASS_AUTH = false
 
     return (
         <BrowserRouter>

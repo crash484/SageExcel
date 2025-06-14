@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Bar, Line, Pie } from 'react-chartjs-2';
+import { Bar, Line, Pie, Doughnut, Radar, Scatter } from 'react-chartjs-2';
+import Plot from 'react-plotly.js';
 import 'chart.js/auto';
 import { useSelector } from 'react-redux';
 import { selectCurrentToken } from '../store/authSlice';
@@ -17,10 +18,7 @@ const ChartViewer = () => {
     const fetchChart = async () => {
       try {
         const response = await fetch(`http://localhost:5000/api/auth/analysis/${chartId}`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
         const data = await response.json();
         if (response.ok) {
@@ -38,19 +36,21 @@ const ChartViewer = () => {
     const fetchFileAndExtractData = async (fileId, selectedFields) => {
       try {
         const res = await fetch(`http://localhost:5000/api/auth/preview/${fileId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
         const blob = await res.blob();
         const arrayBuffer = await blob.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet);
-        const filtered = json.map(row => ({
-          [selectedFields[0]]: row[selectedFields[0]],
-          [selectedFields[1]]: row[selectedFields[1]]
-        }));
+
+        const filtered = json.map(row => {
+          const filteredRow = {};
+          selectedFields.forEach(field => {
+            filteredRow[field] = row[field];
+          });
+          return filteredRow;
+        });
         setDataPoints(filtered);
       } catch (err) {
         console.error(err);
@@ -61,30 +61,280 @@ const ChartViewer = () => {
     fetchChart();
   }, [token, chartId]);
 
-  if (error) return <div className="text-red-600">{error}</div>;
-  if (!chartData || dataPoints.length === 0) return <div>Loading...</div>;
+  const groupByAndAggregate = (groupCol, valueCol, operation = 'sum') => {
+    const grouped = {};
+    dataPoints.forEach(row => {
+      const key = row[groupCol];
+      const value = parseFloat(row[valueCol]) || 0;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(value);
+    });
 
-  const { chartType, chartOptions, selectedFields } = chartData;
-
-  const chartConfig = {
-    labels: dataPoints.map(dp => dp[selectedFields[0]]),
-    datasets: [{
-      label: selectedFields[1],
-      data: dataPoints.map(dp => dp[selectedFields[1]]),
-      backgroundColor: 'rgba(99, 102, 241, 0.7)',
-    }],
+    return Object.entries(grouped).map(([key, values]) => ({
+      label: key,
+      value: operation === 'sum'
+        ? values.reduce((a, b) => a + b, 0)
+        : operation === 'avg'
+          ? values.reduce((a, b) => a + b, 0) / values.length
+          : values.length,
+    }));
   };
 
+  const generateColors = (count) => {
+    const baseColors = [
+      'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)',
+      'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)',
+      'rgba(199, 199, 199, 0.6)', 'rgba(83, 102, 255, 0.6)', 'rgba(255, 140, 184, 0.6)',
+      'rgba(100, 255, 218, 0.6)'
+    ];
+    const borderColors = baseColors.map(c => c.replace('0.6', '1'));
+    return {
+      backgroundColor: Array.from({ length: count }, (_, i) => baseColors[i % baseColors.length]),
+      borderColor: Array.from({ length: count }, (_, i) => borderColors[i % borderColors.length])
+    };
+  };
+
+  // Updated generateChartConfig to match Visualize.jsx logic exactly
+  const generateChartConfig = () => {
+    if (!chartData || !dataPoints.length) return null;
+
+    const { selectedFields, chartOptions } = chartData;
+    const xAxis = chartOptions?.xAxis || selectedFields[0];
+    const yAxis = chartOptions?.yAxis || selectedFields[1];
+    const groupBy = chartOptions?.groupBy || selectedFields[0];
+    const aggregation = chartOptions?.aggregation || 'sum';
+
+    // Use the SAME logic as Visualize.jsx
+    const finalData = groupBy && yAxis
+      ? groupByAndAggregate(groupBy, yAxis, aggregation)
+      : dataPoints.map(row => ({ label: row[xAxis], value: parseFloat(row[yAxis]) || 0 }));
+
+    const colors = generateColors(finalData.length);
+
+    return {
+      labels: finalData.map(d => d.label),
+      datasets: [{
+        label: `${yAxis} vs ${xAxis}`,
+        data: finalData.map(d => d.value),
+        backgroundColor: colors.backgroundColor,
+        borderColor: colors.borderColor,
+        borderWidth: 1
+      }]
+    };
+  };
+
+  const generate3DPlotlyData = () => {
+    if (!chartData || !dataPoints.length) return [];
+
+    const { selectedFields, chartOptions } = chartData;
+    const xAxis = chartOptions?.xAxis || selectedFields[0];
+    const yAxis = chartOptions?.yAxis || selectedFields[1];
+    const zAxis = selectedFields[2] || null;
+    const groupBy = chartOptions?.groupBy || selectedFields[0];
+    const aggregation = chartOptions?.aggregation || 'sum';
+
+    switch (chartData.chartType) {
+      case 'bar3d':
+        // Use the SAME logic as Visualize.jsx for 3D bars
+        let processedData;
+        if (groupBy && groupBy !== xAxis) {
+          // Group and aggregate data
+          processedData = groupByAndAggregate(groupBy, yAxis, aggregation);
+        } else {
+          // Use raw data
+          processedData = dataPoints.map(row => ({
+            label: row[xAxis],
+            value: parseFloat(row[yAxis]) || 0
+          }));
+        }
+
+        const categories = [...new Set(processedData.map(item => item.label))];
+        const barWidth = 0.8;
+        const barDepth = 0.8;
+
+        // Generate consistent colors - one color per unique category
+        const baseColors = [
+          'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)',
+          'rgba(199, 199, 199, 1)', 'rgba(83, 102, 255, 1)', 'rgba(255, 140, 184, 1)',
+          'rgba(100, 255, 218, 1)'
+        ];
+
+        // Create color mapping for categories
+        const categoryColorMap = {};
+        categories.forEach((category, index) => {
+          categoryColorMap[category] = baseColors[index % baseColors.length];
+        });
+
+        return processedData.map((item, index) => {
+          const xCenter = categories.indexOf(item.label);
+          const height = item.value;
+
+          const x0 = xCenter - barWidth / 2;
+          const x1 = xCenter + barWidth / 2;
+          const y0 = 0;
+          const y1 = height;
+          const z0 = -barDepth / 2;
+          const z1 = barDepth / 2;
+
+          const vertices = {
+            x: [x0, x1, x1, x0, x0, x1, x1, x0],
+            y: [y0, y0, y1, y1, y0, y0, y1, y1],
+            z: [z0, z0, z0, z0, z1, z1, z1, z1]
+          };
+
+          const faces = {
+            i: [0, 0, 0, 1, 1, 2, 2, 3, 4, 4, 5, 6],
+            j: [1, 3, 4, 2, 5, 3, 6, 0, 5, 7, 6, 7],
+            k: [2, 1, 5, 3, 6, 2, 7, 4, 6, 6, 7, 3]
+          };
+
+          const hoverText = groupBy && groupBy !== xAxis
+            ? `${groupBy}: ${item.label}<br>${yAxis} (${aggregation}): ${height.toFixed(2)}`
+            : `${xAxis}: ${item.label}<br>${yAxis}: ${height}`;
+
+          return {
+            type: 'mesh3d',
+            ...vertices,
+            ...faces,
+            opacity: 1,
+            color: categoryColorMap[item.label], // Consistent color per category
+            name: item.label,
+            hovertext: hoverText,
+            hoverinfo: 'text',
+            showlegend: index === processedData.findIndex(d => d.label === item.label) // Show legend only once per category
+          };
+        });
+
+      case 'scatter3d':
+        return [{
+          type: 'scatter3d',
+          mode: 'markers',
+          x: dataPoints.map(row => row[xAxis]),
+          y: dataPoints.map(row => parseFloat(row[yAxis]) || 0),
+          z: dataPoints.map(row => zAxis ? (parseFloat(row[zAxis]) || 0) : 0),
+          marker: {
+            size: 8,
+            color: dataPoints.map(row => parseFloat(row[yAxis]) || 0),
+            colorscale: 'Viridis',
+            opacity: 0.8,
+            colorbar: { title: yAxis }
+          },
+          text: dataPoints.map(row => `${xAxis}: ${row[xAxis]}<br>${yAxis}: ${row[yAxis]}<br>${zAxis}: ${row[zAxis]}`),
+          name: '3D Scatter'
+        }];
+
+      case 'surface3d':
+        const uniqueX = [...new Set(dataPoints.map(row => row[xAxis]))];
+        const uniqueY = [...new Set(dataPoints.map(row => parseFloat(row[yAxis]) || 0))];
+
+        const zValues = uniqueY.map(y =>
+          uniqueX.map(x => {
+            const match = dataPoints.find(row => row[xAxis] === x && (parseFloat(row[yAxis]) || 0) === y);
+            return match ? (parseFloat(match[zAxis]) || 0) : 0;
+          })
+        );
+
+        return [{
+          type: 'surface',
+          x: uniqueX,
+          y: uniqueY,
+          z: zValues,
+          colorscale: 'Viridis',
+          name: '3D Surface'
+        }];
+
+      default:
+        return [];
+    }
+  };
+
+  if (error) return <div className="text-red-600 text-center mt-10">{error}</div>;
+  if (!chartData || dataPoints.length === 0) return <div className="text-center mt-10">Loading chart...</div>;
+
+  const { chartType, chartOptions, selectedFields } = chartData;
+  const is3DChart = ['bar3d', 'scatter3d', 'surface3d'].includes(chartType);
   const ChartComponent = {
-    bar: Bar,
-    line: Line,
-    pie: Pie
+    bar: Bar, line: Line, pie: Pie, doughnut: Doughnut, radar: Radar, scatter: Scatter
   }[chartType] || Bar;
 
+  // Create plotly layout that matches Visualize.jsx
+  const xAxis = chartOptions?.xAxis || selectedFields[0];
+  const yAxis = chartOptions?.yAxis || selectedFields[1];
+  const zAxis = selectedFields[2] || null;
+  const groupBy = chartOptions?.groupBy || selectedFields[0];
+  const aggregation = chartOptions?.aggregation || 'sum';
+
+  const categories = dataPoints && xAxis ? [...new Set(dataPoints.map(row => row[xAxis]))] : [];
+
+  const plotlyLayout = {
+    title: {
+      text: chartOptions?.title || chartData.title,
+      font: { size: 18 }
+    },
+    scene: {
+      xaxis: {
+        title: xAxis,
+        tickvals: categories.map((_, i) => i),
+        ticktext: categories
+      },
+      yaxis: {
+        title: groupBy && groupBy !== xAxis ? `${yAxis} (${aggregation})` : yAxis
+      },
+      zaxis: { title: zAxis }
+    },
+    margin: { l: 0, r: 0, b: 0, t: 50 },
+    showlegend: true
+  };
+
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">{chartOptions?.title || 'Saved Chart'}</h2>
-      <ChartComponent data={chartConfig} />
+    <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 to-purple-100 dark:from-gray-800 dark:to-gray-900">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-center text-indigo-700 dark:text-white mb-6">
+          📊 {chartOptions?.title || chartData.title || 'Saved Chart'}
+        </h1>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+          <div className="h-[600px]">
+            {is3DChart ? (
+              <Plot
+                data={generate3DPlotlyData()}
+                layout={plotlyLayout}
+                config={{ responsive: true, displayModeBar: true }}
+                style={{ width: '100%', height: '100%' }}
+              />
+            ) : (
+              <ChartComponent
+                data={generateChartConfig()}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    title: {
+                      display: true,
+                      text: chartOptions?.title || chartData.title,
+                      font: { size: 18 }
+                    },
+                    legend: { position: 'top' },
+                    tooltip: {
+                      callbacks: {
+                        label: context => `${context.label}: ${context.raw}`
+                      }
+                    }
+                  }
+                }}
+              />
+            )}
+          </div>
+        </div>
+        <div className="text-center mt-6">
+          <button
+            onClick={() => window.history.back()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition"
+          >
+            ← Back to Charts
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -319,48 +319,43 @@ export default function Visualize() {
     };
 
     const handleSaveAnalysis = async () => {
-        const selectedFields = [];
-
-        if (chartType === 'pie' || chartType === 'doughnut' || chartType === '3d-pie') {
-            selectedFields.push(groupBy, yAxis);
-        } else if (chartType === '3d-scatter') {
-            // For now just use 3 fields (expand logic as needed)
-            selectedFields.push(groupBy, xAxis, yAxis);
-        } else {
-            selectedFields.push(xAxis, yAxis);
-        }
+        const selectedFields = [xAxis, yAxis, groupBy]; // Include groupBy explicitly
 
         const chartOptions = {
             title: chartTitle,
             aggregation,
-            colorTheme: "default", // optional
+            groupBy,      // ✅ send as a separate key
+            xAxis,        // ✅ explicitly send xAxis
+            yAxis,        // ✅ explicitly send yAxis
+            colorTheme: "default"
         };
 
         try {
             const response = await fetch("http://localhost:5000/api/auth/saveAnalysis", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                chartTitle,
-                chartType,
-                selectedFields,
-                chartOptions,
-                fileId,
-            }),
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    chartTitle,
+                    chartType,
+                    selectedFields,
+                    chartOptions,
+                    fileId,
+                }),
             });
 
             if (!response.ok) {
-            throw new Error("Failed to save analysis");
+                throw new Error("Failed to save analysis");
             }
 
             toast.success("Analysis saved successfully!");
         } catch (err) {
             toast.error("Error saving analysis.");
         }
-};
+    };
+
 
     const chartOptions = {
         responsive: true,
@@ -387,11 +382,13 @@ export default function Visualize() {
         },
         scene: {
             xaxis: {
-                title: groupBy && groupBy !== xAxis ? groupBy : xAxis,
+                // Keep x-axis title consistent - it should always show what's actually on the x-axis
+                title: xAxis,
                 tickvals: categories.map((_, i) => i),
                 ticktext: categories
             },
             yaxis: {
+                // Show aggregation info in y-axis title when grouping is applied
                 title: groupBy && groupBy !== xAxis ? `${yAxis} (${aggregation})` : yAxis
             },
             zaxis: { title: zAxis }
@@ -517,12 +514,12 @@ export default function Visualize() {
                                         <FiDownload className="inline mr-1" /> Export
                                     </button>
                                 </div>
-                                    <button
-                                        onClick={handleSaveAnalysis}
-                                        className="w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 mt-2"
-                                        >
-                                        💾 Save Analysis
-                                    </button>
+                                <button
+                                    onClick={handleSaveAnalysis}
+                                    className="w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 mt-2"
+                                >
+                                    💾 Save Analysis
+                                </button>
 
                                 <button onClick={handleReset} className="w-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg py-2 hover:bg-gray-400 mt-2">
                                     <FiRefreshCw className="inline mr-1" /> Reset

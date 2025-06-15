@@ -58,7 +58,7 @@ const Dashboard = () => {
             })),
             ...analysis.slice(-1).reverse().map(a => ({
                 action: `Saved chart "${a.chartTitle}" for ${a.fileName}`,
-                time: formatDate(a.date),
+                time: formatDate(a.createdAt),
             }))
             ];
 

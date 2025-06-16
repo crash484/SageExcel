@@ -319,14 +319,15 @@ export default function Visualize() {
     };
 
     const handleSaveAnalysis = async () => {
-        const selectedFields = [xAxis, yAxis, groupBy]; // Include groupBy explicitly
+        const selectedFields = [xAxis, yAxis, zAxis, groupBy]; // Include groupBy explicitly
 
         const chartOptions = {
             title: chartTitle,
             aggregation,
-            groupBy,      // ✅ send as a separate key
-            xAxis,        // ✅ explicitly send xAxis
-            yAxis,        // ✅ explicitly send yAxis
+            groupBy,
+            xAxis,
+            yAxis,
+            zAxis,  // ✅ <-- include zAxis explicitly
             colorTheme: "default"
         };
 

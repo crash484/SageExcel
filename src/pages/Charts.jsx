@@ -78,6 +78,7 @@ const Charts = () => {
     const renderIcon = (type) => {
         switch (type) {
             case 'bar':
+            case 'bar3d':
                 return <FiBarChart2 className="text-indigo-600 text-2xl" />;
             case 'line':
                 return <FiTrendingUp className="text-blue-600 text-2xl" />;
@@ -86,13 +87,24 @@ const Charts = () => {
             case 'area':
                 return <FiTrendingUp className="text-green-600 text-2xl" />;
             case 'scatter':
+            case 'scatter3d':
                 return <FiBarChart2 className="text-purple-600 text-2xl" />;
             case 'doughnut':
                 return <FiPieChart className="text-orange-600 text-2xl" />;
+            case 'radar':
+                return <FiTrendingUp className="text-teal-600 text-2xl" />;
+            case 'surface3d':
+                return <FiTrendingUp className="text-cyan-600 text-2xl" />;
             default:
                 return <FiBarChart2 className="text-gray-500 text-2xl" />;
         }
     }
+
+    // Helper function to get display title - use chartTitle if available, otherwise fall back to title
+    const getDisplayTitle = (vis) => {
+        return vis.chartTitle || vis.title || 'Untitled Chart';
+    };
+
     if (!isTokenValid) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -142,17 +154,31 @@ const Charts = () => {
                                 <div className="flex items-center gap-3">
                                     {renderIcon(vis.chartType)}
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 dark:text-white">{vis.title}</h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{vis.chartType} chart</p>
+                                        <h3 className="font-semibold text-gray-800 dark:text-white">
+                                            {getDisplayTitle(vis)}
+                                        </h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                                            {vis.chartType?.replace('3d', ' 3D') || 'chart'}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Created: {formatDate(vis.createdAt)}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Created: {formatDate(vis.createdAt)}
+                            </p>
                             <div className="flex justify-between mt-4">
-                                <button onClick={() => handleView(vis._id)} title="View Visualization">
+                                <button
+                                    onClick={() => handleView(vis._id)}
+                                    title="View Visualization"
+                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
                                     <FiEye className="text-green-600 hover:text-green-800 text-xl" />
                                 </button>
-                                <button onClick={() => handleDelete(vis.id || vis._id)} title="Delete Visualization">
+                                <button
+                                    onClick={() => handleDelete(vis.id || vis._id)}
+                                    title="Delete Visualization"
+                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
                                     <FiTrash2 className="text-red-600 hover:text-red-800 text-xl" />
                                 </button>
                             </div>

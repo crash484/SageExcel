@@ -94,7 +94,6 @@ const ChartViewer = () => {
     };
   };
 
-  // Updated generateChartConfig to match Visualize.jsx logic exactly
   const generateChartConfig = () => {
     if (!chartData || !dataPoints.length) return null;
 
@@ -104,7 +103,6 @@ const ChartViewer = () => {
     const groupBy = chartOptions?.groupBy || selectedFields[0];
     const aggregation = chartOptions?.aggregation || 'sum';
 
-    // Use the SAME logic as Visualize.jsx
     const finalData = groupBy && yAxis
       ? groupByAndAggregate(groupBy, yAxis, aggregation)
       : dataPoints.map(row => ({ label: row[xAxis], value: parseFloat(row[yAxis]) || 0 }));
@@ -129,41 +127,35 @@ const ChartViewer = () => {
     const { selectedFields, chartOptions } = chartData;
     const xAxis = chartOptions?.xAxis || selectedFields[0];
     const yAxis = chartOptions?.yAxis || selectedFields[1];
-    const zAxis = selectedFields[2] || null;
+    const zAxis = chartOptions?.zAxis || selectedFields[2] || null;
     const groupBy = chartOptions?.groupBy || selectedFields[0];
     const aggregation = chartOptions?.aggregation || 'sum';
+    const data = dataPoints;
+    const categories = [...new Set(data.map(row => row[xAxis]))];
 
     switch (chartData.chartType) {
       case 'bar3d':
-        // Use the SAME logic as Visualize.jsx for 3D bars
         let processedData;
         if (groupBy && groupBy !== xAxis) {
-          // Group and aggregate data
           processedData = groupByAndAggregate(groupBy, yAxis, aggregation);
         } else {
-          // Use raw data
-          processedData = dataPoints.map(row => ({
+          processedData = data.map(row => ({
             label: row[xAxis],
             value: parseFloat(row[yAxis]) || 0
           }));
         }
 
-        const categories = [...new Set(processedData.map(item => item.label))];
         const barWidth = 0.8;
         const barDepth = 0.8;
-
-        // Generate consistent colors - one color per unique category
         const baseColors = [
           'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)',
           'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)',
           'rgba(199, 199, 199, 1)', 'rgba(83, 102, 255, 1)', 'rgba(255, 140, 184, 1)',
           'rgba(100, 255, 218, 1)'
         ];
-
-        // Create color mapping for categories
         const categoryColorMap = {};
-        categories.forEach((category, index) => {
-          categoryColorMap[category] = baseColors[index % baseColors.length];
+        categories.forEach((cat, idx) => {
+          categoryColorMap[cat] = baseColors[idx % baseColors.length];
         });
 
         return processedData.map((item, index) => {
@@ -198,39 +190,58 @@ const ChartViewer = () => {
             ...vertices,
             ...faces,
             opacity: 1,
-            color: categoryColorMap[item.label], // Consistent color per category
+            color: categoryColorMap[item.label],
             name: item.label,
             hovertext: hoverText,
             hoverinfo: 'text',
-            showlegend: index === processedData.findIndex(d => d.label === item.label) // Show legend only once per category
+            showlegend: index === processedData.findIndex(d => d.label === item.label)
           };
         });
 
       case 'scatter3d':
+        const xValues = data.map(row => isNaN(row[xAxis]) ? row[xAxis] : parseFloat(row[xAxis]));
+        const yValues = data.map(row => parseFloat(row[yAxis]) || 0);
+        const zValues = data.map(row => {
+          const val = zAxis ? row[zAxis] : null;
+          const num = val && typeof val === 'string'
+            ? parseFloat(val.replace(/[^0-9.]/g, ''))
+            : parseFloat(val);
+          return !isNaN(num) ? num : 0;
+        });
+
         return [{
           type: 'scatter3d',
           mode: 'markers',
-          x: dataPoints.map(row => row[xAxis]),
-          y: dataPoints.map(row => parseFloat(row[yAxis]) || 0),
-          z: dataPoints.map(row => zAxis ? (parseFloat(row[zAxis]) || 0) : 0),
+          x: xValues,
+          y: yValues,
+          z: zValues,
           marker: {
             size: 8,
-            color: dataPoints.map(row => parseFloat(row[yAxis]) || 0),
+            color: yValues,
             colorscale: 'Viridis',
             opacity: 0.8,
-            colorbar: { title: yAxis }
+            colorbar: {
+              title: yAxis
+            }
           },
-          text: dataPoints.map(row => `${xAxis}: ${row[xAxis]}<br>${yAxis}: ${row[yAxis]}<br>${zAxis}: ${row[zAxis]}`),
+          text: data.map(row =>
+            zAxis
+              ? `${xAxis}: ${row[xAxis]}<br>${yAxis}: ${row[yAxis]}<br>${zAxis}: ${row[zAxis]}`
+              : `${xAxis}: ${row[xAxis]}<br>${yAxis}: ${row[yAxis]}`
+          ),
+          hoverinfo: 'text',
           name: '3D Scatter'
         }];
 
       case 'surface3d':
-        const uniqueX = [...new Set(dataPoints.map(row => row[xAxis]))];
-        const uniqueY = [...new Set(dataPoints.map(row => parseFloat(row[yAxis]) || 0))];
+        const uniqueX = [...new Set(data.map(row => row[xAxis]))];
+        const uniqueY = [...new Set(data.map(row => parseFloat(row[yAxis]) || 0))];
 
-        const zValues = uniqueY.map(y =>
+        const zMatrix = uniqueY.map(y =>
           uniqueX.map(x => {
-            const match = dataPoints.find(row => row[xAxis] === x && (parseFloat(row[yAxis]) || 0) === y);
+            const match = data.find(row =>
+              row[xAxis] === x && (parseFloat(row[yAxis]) || 0) === y
+            );
             return match ? (parseFloat(match[zAxis]) || 0) : 0;
           })
         );
@@ -239,7 +250,7 @@ const ChartViewer = () => {
           type: 'surface',
           x: uniqueX,
           y: uniqueY,
-          z: zValues,
+          z: zMatrix,
           colorscale: 'Viridis',
           name: '3D Surface'
         }];
@@ -258,14 +269,13 @@ const ChartViewer = () => {
     bar: Bar, line: Line, pie: Pie, doughnut: Doughnut, radar: Radar, scatter: Scatter
   }[chartType] || Bar;
 
-  // Create plotly layout that matches Visualize.jsx
   const xAxis = chartOptions?.xAxis || selectedFields[0];
   const yAxis = chartOptions?.yAxis || selectedFields[1];
   const zAxis = selectedFields[2] || null;
   const groupBy = chartOptions?.groupBy || selectedFields[0];
   const aggregation = chartOptions?.aggregation || 'sum';
 
-  const categories = dataPoints && xAxis ? [...new Set(dataPoints.map(row => row[xAxis]))] : [];
+  const categories = [...new Set(dataPoints.map(row => row[xAxis]))];
 
   const plotlyLayout = {
     title: {
@@ -281,10 +291,12 @@ const ChartViewer = () => {
       yaxis: {
         title: groupBy && groupBy !== xAxis ? `${yAxis} (${aggregation})` : yAxis
       },
-      zaxis: { title: zAxis }
+      zaxis: {
+        title: zAxis || 'Z'
+      }
     },
     margin: { l: 0, r: 0, b: 0, t: 50 },
-    showlegend: true
+    showlegend: chartType !== 'scatter3d'
   };
 
   return (

@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import analyticsAnimation from './animation/Animation - 1749444335721.json';
 import toast from 'react-hot-toast';
+import { analyzeData } from '../lib/gemini';
 
 
 ChartJS.register(...registerables);
@@ -19,6 +20,9 @@ export default function Visualize() {
     const fileId = location.state?.id;
     const token = location.state?.token;
     const navigate = useNavigate();
+    const [analysisResult,setAnalysisResult]= useState("");
+
+    
 
     const [chartData, setChartData] = useState(null);
     const [chartType, setChartType] = useState('bar');
@@ -343,6 +347,7 @@ export default function Visualize() {
                     selectedFields,
                     chartOptions,
                     fileId,
+                    summary: analysisResult // <-- Save AI summary
                 }),
             });
 
@@ -405,6 +410,27 @@ export default function Visualize() {
         setGroupBy(headers[0]);
         setAggregation('sum');
         setChartTitle('My Chart');
+    };
+
+    //ai addition
+    const handleGeminiAnalysis = async()=> {
+        const payload = {
+            chartTitle,
+            chartType,
+            xAxis,
+            yAxis,
+            zAxis,
+            groupBy,
+            data,
+            headers,
+        }
+        try{
+            const result  = await analyzeData(payload);
+            setAnalysisResult(result);
+        } catch(err) {
+            console.log(err)
+            setAnalysisResult("AI analysis failed")
+        }
     };
 
     return (
@@ -525,6 +551,12 @@ export default function Visualize() {
                                     <FiRefreshCw className="inline mr-1" /> Reset
                                 </button>
                             </div>
+                            <button
+                                onClick={handleGeminiAnalysis}
+                                className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                >
+                                🤖 Analyze with Gemini
+                                </button>
                         </motion.div>
 
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
@@ -548,7 +580,14 @@ export default function Visualize() {
                                     <Chart ref={chartRef} type={chartType} data={generateChartData()} options={chartOptions} />
                                 )}
                             </motion.div>
+                            {analysisResult && (
+                                <div className="mt-8 p-6 rounded-xl bg-indigo-100 dark:bg-indigo-900 text-gray-900 dark:text-white shadow">
+                                    <h3 className="text-lg font-bold mb-2">AI Insight</h3>
+                                    <pre className="whitespace-pre-wrap">{analysisResult}</pre>
+                                </div>
+                            )}
                         </motion.div>
+                        
                     </div>
                 )}
             </div>

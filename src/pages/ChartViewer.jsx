@@ -326,6 +326,22 @@ const ChartViewer = () => {
             )}
           </div>
         </div>
+        {/* AI Summary Section */}
+        {chartData?.summary && (
+          <div className="mt-8 p-6 rounded-xl bg-indigo-100 dark:bg-indigo-900 text-gray-900 dark:text-white shadow mx-auto max-w-3xl">
+            <h3 className="text-lg font-bold mb-2 text-center">AI Insight</h3>
+            {Array.isArray(chartData.summary) ? (
+              <ul className="list-disc list-inside space-y-2">
+                {chartData.summary.map((line, idx) => (
+                  <li key={idx} className="text-base text-left whitespace-pre-line">{line}</li>
+                ))}
+              </ul>
+            ) : (
+              <pre className="whitespace-pre-line text-base text-left">{chartData.summary}</pre>
+            )}
+          </div>
+        )}
+        {/* End AI Summary Section */}
         <div className="text-center mt-6">
           <button
             onClick={() => window.history.back()}

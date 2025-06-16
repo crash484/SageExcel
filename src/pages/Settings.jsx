@@ -40,29 +40,7 @@ const Settings = () => {
     }, [token]);
 
     const handleChangePassword = async () => {
-        try {
-            const response = await fetch('http://localhost:5000/api/auth/changePassword', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    oldPassword: 'sampleOld',
-                    newPassword: 'sampleNew123',
-                }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                toast.success('Password changed successfully (mock)');
-            } else {
-                toast.error(result.message || 'Failed to change password');
-            }
-        } catch (err) {
-            toast.error('Error occurred while changing password');
-        }
+        navigate('/change-password');
     };
 
     if (loading) return <div className="p-4 text-gray-700 dark:text-gray-200">Loading settings...</div>;

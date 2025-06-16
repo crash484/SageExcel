@@ -13,7 +13,7 @@ const SavedAnalysisSchema = new mongoose.Schema(
                 chartOptions: Object, // Extra config like color, 3D depth, labels
                 filters: Object,      // Any filters user applies (e.g., { region: 'Asia' })
 
-                summary: String, // Optional AI-generated insights
+                summary: [String], // Optional AI-generated insights as array of strings
 
                 createdAt: { type: Date, default: Date.now }
             }

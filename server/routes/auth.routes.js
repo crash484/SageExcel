@@ -246,7 +246,7 @@ router.put("/giveAdmin",verifyToken, async (req,res)=>{
 //route to save analysis
 router.post('/saveAnalysis', verifyToken, async (req, res) => {
   try {
-    const { chartTitle, chartType, selectedFields, chartOptions, fileId } = req.body;
+    const { chartTitle, chartType, selectedFields, chartOptions, fileId, summary } = req.body;
     const userId = req.user._id;
 
     if (!chartType || !selectedFields || !fileId) {
@@ -259,7 +259,8 @@ router.post('/saveAnalysis', verifyToken, async (req, res) => {
       chartTitle,
       chartType,
       selectedFields,
-      chartOptions
+      chartOptions,
+      summary // <-- Save summary if provided
     });
 
     await newAnalysis.save();
@@ -284,9 +285,7 @@ router.get("/getAnalysis", verifyToken, async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const analysis = await SavedAnalysis.find({ userId });
-
-
+    const analysis = await SavedAnalysis.find({ userId }).select("-__v");
     res.status(200).json({ analysis });
 
   } catch (err) {
@@ -329,7 +328,7 @@ router.get("/getData", verifyToken, async (req, res) => {
 //route to get one chart
 router.get('/analysis/:id', verifyToken, async (req, res) => {
   try {
-    const chart = await SavedAnalysis.findById(req.params.id);
+    const chart = await SavedAnalysis.findById(req.params.id).select("-__v");
     if (!chart) return res.status(404).json({ message: 'Chart not found' });
 
     res.status(200).json(chart);
@@ -369,4 +368,27 @@ router.get('/analysis/:id', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+//route to change 
+router.put('/changePassword', verifyToken, async (req, res)=>{
+  const{oldPassword, newPassword} = req.body;
+  try {
+    const user = await User.findOne({ email: req.user.email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Check old password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Old password is incorrect' });
+
+    // Hash new password and update
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+})
 export default router;

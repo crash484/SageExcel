@@ -16,59 +16,14 @@ export default function History() {
     const token = useSelector(selectCurrentToken);
     const [uploads, setUploads] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isTokenValid, setIsTokenValid] = useState(DEV_MODE ? true : false); // Bypass auth in dev mode
-    const [previewData, setPreviewData] = useState("");
+    const [isTokenValid, setIsTokenValid] = useState(false); // Bypass auth in dev mode
 
 
-    // Mock data for development
-    const mockData = [
-        {
-            id: '1',
-            filename: 'sales_Q2_2023.xlsx',
-            date: new Date().toISOString(),
-            headers: ['Product', 'Region', 'Revenue', 'Units Sold'],
-            size: '356 KB',
-            status: 'processed'
-        },
-        {
-            id: '2',
-            filename: 'customer_feedback.xlsx',
-            date: new Date(Date.now() - 86400000).toISOString(),
-            headers: ['Customer ID', 'Rating', 'Comments', 'Date'],
-            size: '512 KB',
-            status: 'processed'
-        },
-        {
-            id: '3',
-            filename: 'inventory_may.xlsx',
-            date: new Date(Date.now() - 172800000).toISOString(),
-            headers: ['SKU', 'Item Name', 'Quantity', 'Location'],
-            size: '278 KB',
-            status: 'processed'
-        }
-    ];
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (!DEV_MODE) {
-                    // PRODUCTION: Actual token verification
-                    const authData = await SendRequest(token);
-                    setIsTokenValid(true);
-                    console.log('Token verification result:', authData);
-                } else {
-                    // DEVELOPMENT: Bypass auth
-                    console.log('Development mode - bypassing auth');
-                }
-
-                if (DEV_MODE) {
-                    // DEVELOPMENT: Use mock data with delay to simulate API call
-                    setTimeout(() => {
-                        setUploads(mockData);
-                        setIsLoading(false);
-                    }, 800);
-                } else {
-
+                    setIsLoading(true);
                     const response = await fetch('http://localhost:5000/api/auth/getFiles', {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -80,12 +35,13 @@ export default function History() {
                         const files = user.uploadedFiles;
                         setUploads(files);
                         setIsLoading(false)
+                        setIsTokenValid(true); // Set token valid if response is ok
                     }
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                toast.error(DEV_MODE ? 'Mock error simulation' : error.message || 'Failed to load history');
-                setIsLoading(false);
+                catch (error) {
+                    console.error('Error:', error);
+                    toast.error(DEV_MODE ? 'Mock error simulation' : error.message || 'Failed to load history');
+                    setIsLoading(false);
             }
         };
 
@@ -94,12 +50,12 @@ export default function History() {
 
     //method for handling downlaod
     const handleDownload = async (fileId, fileName) => {
-        if (DEV_MODE) {
-            // DEVELOPMENT: Simulate download
-            toast.success(`[DEV] Would download file ${fileId}`);
-            console.log('Would download file:', fileId);
-            return;
-        }
+        // if (DEV_MODE) {
+        //     // DEVELOPMENT: Simulate download
+        //     toast.success(`[DEV] Would download file ${fileId}`);
+        //     console.log('Would download file:', fileId);
+        //     return;
+        // }
 
 
         try {
@@ -173,12 +129,11 @@ export default function History() {
 
     //method for handling veiw
     const handleView = async (fileId) => {
-        console.log(fileId);
         navigate('/visualize', { state: { id: fileId, token: token } });
     }
 
     // Skip token check in development
-    if (!DEV_MODE && !isTokenValid) {
+    if (!isTokenValid) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">

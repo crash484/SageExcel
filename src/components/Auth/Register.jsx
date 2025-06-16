@@ -18,7 +18,7 @@ const isValidEmail = (email) => {
 };
 
 const isValidPassword = (password) =>
-            /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/.test(password)
+  /^(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z\d])[A-Za-z\d\W]{8,}$/.test(password);
 
 
 export default function RegisterPage() {

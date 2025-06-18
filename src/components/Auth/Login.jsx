@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import excelChartAnim from './animations/Animation - 1749184199071.json'; // Add an Excel chart-like Lottie animation
 import { useDispatch } from 'react-redux';
-import { setCredentials } from '../../store/authSlice';
+import { selectCurrentUser, setCredentials } from '../../store/authSlice';
 import { toast } from 'react-hot-toast';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
@@ -60,7 +60,11 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (response.ok) {
-                dispatch(setCredentials(data));
+                // Set credentials with correct user object and token
+                dispatch(setCredentials({
+                    user: { name: data.name },
+                    token: data.token
+                }));
                 navigate('/dashboard');
                 toast.success('Login successful!');
             } else {

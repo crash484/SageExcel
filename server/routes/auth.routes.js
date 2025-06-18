@@ -68,7 +68,7 @@ router.post('/register',async (req,res)=>{
 
             if(err) console.log(err);
 
-            res.status(201).json({token,message:"successfully logged in"});
+            res.status(201).json({token,name:`${user.name}`,message:"successfully logged in"});
             return;
           })
       }

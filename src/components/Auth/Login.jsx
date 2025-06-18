@@ -110,20 +110,22 @@ export default function LoginPage() {
                         />
                         <div className='relative'>
                         <input
-
-                            type= {showPassword ? 'text' : 'password'}
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             placeholder="Password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full p-3 mb-6 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            className="w-full p-3 mb-6 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white pr-12"
                             required
                         />
                         <button
-                            type = "button"
-                            onClick={()=> setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-4 flex items-center text-sm text-gray-500 dark:text-gray-300 pb-5"       
-                            >
+                            type="button"
+                            tabIndex={-1}
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-3 flex items-center text-lg text-gray-500 dark:text-gray-300 px-2 focus:outline-none cursor-pointer py-2"
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            style={{ pointerEvents: 'auto' }}
+                        >
                             {showPassword ? <FiEyeOff /> : <FiEye />}
                         </button>
                         </div>

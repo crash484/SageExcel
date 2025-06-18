@@ -132,13 +132,26 @@ export default function History() {
         navigate('/visualize', { state: { id: fileId, token: token } });
     }
 
-    // Skip token check in development
-    if (!isTokenValid) {
+    // Loading and Auth logic
+    if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">Session Expired</h1>
-                    <p>Please login again to view your history</p>
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Loading...</h1>
+                </div>
+            </div>
+        );
+    }
+    if (!DEV_MODE && !isTokenValid) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+                <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        Authentication Required
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300">
+                        Please login to access your upload history.
+                    </p>
                 </div>
             </div>
         );

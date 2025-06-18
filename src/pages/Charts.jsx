@@ -105,12 +105,21 @@ const Charts = () => {
         return vis.chartTitle || vis.title || 'Untitled Chart';
     };
 
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Loading...</h1>
+                </div>
+            </div>
+        );
+    }
     if (!isTokenValid) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">Session Expired</h1>
-                    <p>Please log in again to view your visualizations.</p>
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Authentication Required</h1>
+                    <p className="text-gray-600 dark:text-gray-300">Please log in again to view your visualizations.</p>
                 </div>
             </div>
         );

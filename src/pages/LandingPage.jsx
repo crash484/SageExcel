@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart3, FileSpreadsheet, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import winningAnimation from '../components/Auth/animations/winningAnimation- 1750288890316.json';
+import Lottie from 'lottie-react';
 
 export default function InteractiveLandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -10,6 +12,7 @@ export default function InteractiveLandingPage() {
   const [showContent, setShowContent] = useState(false);
   const [surrendered, setSurrendered] = useState(false);
   const [particles, setParticles] = useState([]);
+  const [showGraffiti, setShowGraffiti] = useState(false);
   const containerRef = useRef(null);
   const chaseTimeRef = useRef(0);
 
@@ -106,9 +109,29 @@ export default function InteractiveLandingPage() {
     return () => clearInterval(interval);
   }, [mousePosition, isChasing, surrendered]);
 
+  // --- CHASE TIMER LOGIC ---
+  useEffect(() => {
+    if (!isChasing) return;
+    const timer = setTimeout(() => {
+      if (!showContent) {
+        setSurrendered(true);
+        setIsChasing(false);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [isChasing, showContent]);
+
   // Handle analytics icon click
   const handleAnalyticsClick = () => {
-    if (!isChasing) {
+    if (isChasing && !surrendered) {
+      setIsChasing(false);
+      setShowGraffiti(true);
+      setTimeout(() => {
+        setShowContent(true);
+        setShowGraffiti(false);
+      }, 1500); // Show graffiti for 1.5s before showing main content
+    } else if (!isChasing && surrendered) {
+      // Only allow click after surrender
       // Create explosion particles
       const newParticles = Array.from({ length: 20 }, (_, i) => ({
         id: i,
@@ -118,7 +141,6 @@ export default function InteractiveLandingPage() {
         speed: Math.random() * 5 + 2
       }));
       setParticles(newParticles);
-
       setTimeout(() => {
         setShowContent(true);
         setParticles([]);
@@ -249,6 +271,19 @@ export default function InteractiveLandingPage() {
         ))}
       </AnimatePresence>
 
+      {/* Graffiti (winning) animation overlay */}
+      {showGraffiti && (
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center z-50 bg-black/40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.7, ease: 'easeInOut' }}
+        >
+          <Lottie animationData={winningAnimation} loop={false} style={{ width: 400, height: 400 }} />
+        </motion.div>
+      )}
+
       {/* Chase instructions */}
       {isChasing && !surrendered && (
         <motion.div
@@ -272,8 +307,8 @@ export default function InteractiveLandingPage() {
           animate={{ opacity: 1, scale: 1 }}
         >
           <div className="bg-white/10 backdrop-blur-sm rounded-lg px-6 py-3 text-white text-center">
-            <p className="text-lg font-semibold">I surrender! 🏳️</p>
-            <p className="text-sm opacity-80">Click me to continue</p>
+            <p className="text-lg font-semibold">You couldn't catch it! 😅</p>
+            <p className="text-sm opacity-80">Click the icon to surrender and continue.</p>
           </div>
         </motion.div>
       )}

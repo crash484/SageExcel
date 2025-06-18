@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import excelChartAnim from './animations/Animation - 1749184199071.json'; // Add an Excel chart-like Lottie animation
 import { useDispatch } from 'react-redux';
-import { setCredentials } from '../../store/authSlice';
+import { selectCurrentUser, setCredentials } from '../../store/authSlice';
 import { toast } from 'react-hot-toast';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
@@ -60,7 +60,11 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (response.ok) {
-                dispatch(setCredentials(data));
+                // Set credentials with correct user object and token
+                dispatch(setCredentials({
+                    user: { name: data.name },
+                    token: data.token
+                }));
                 navigate('/dashboard');
                 toast.success('Login successful!');
             } else {
@@ -110,20 +114,22 @@ export default function LoginPage() {
                         />
                         <div className='relative'>
                         <input
-
-                            type= {showPassword ? 'text' : 'password'}
+                            type={showPassword ? 'text' : 'password'}
                             name="password"
                             placeholder="Password"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full p-3 mb-6 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            className="w-full p-3 mb-6 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white pr-12"
                             required
                         />
                         <button
-                            type = "button"
-                            onClick={()=> setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-4 flex items-center text-sm text-gray-500 dark:text-gray-300 pb-5"       
-                            >
+                            type="button"
+                            tabIndex={-1}
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-3 flex items-center text-lg text-gray-500 dark:text-gray-300 px-2 focus:outline-none cursor-pointer py-2"
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            style={{ pointerEvents: 'auto' }}
+                        >
                             {showPassword ? <FiEyeOff /> : <FiEye />}
                         </button>
                         </div>

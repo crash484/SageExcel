@@ -68,7 +68,7 @@ router.post('/register',async (req,res)=>{
 
             if(err) console.log(err);
 
-            res.status(201).json({token,message:"successfully logged in"});
+            res.status(201).json({token,name:`${user.name}`,message:"successfully logged in"});
             return;
           })
       }
@@ -199,49 +199,24 @@ router.post('/register',async (req,res)=>{
  //route for returning all users
 router.get('/getAllUsers', verifyToken, async (req, res) => {
     try {
-        const users = await User.find({}, '-password'); // exclude password
-        res.status(200).json({ users });
+        // Populate uploadedFiles and savedAnalyses for each user
+        const users = await User.find({}, '-password')
+            .populate('uploadedFiles')
+            .populate('savedAnalyses');
+        // For each user, add counts for files and analyses
+        const usersWithCounts = users.map(user => ({
+            _id: user._id,
+            name: user.name,
+            filesUploaded: user.uploadedFiles ? user.uploadedFiles.length : 0,
+            analysesMade: user.savedAnalyses ? user.savedAnalyses.length : 0,
+        }));
+        res.status(200).json({ users: usersWithCounts });
     } catch (err) {
         console.error('Error fetching users:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
 
-//route for revoking admin privileges 
-router.put("/revokeAdmin",verifyToken, async (req,res)=>{
-    try{
-      const userId = req.body.userId;
-      const user = await User.findOne({ _id:userId });
-      if(user){
-        user.isAdmin = false;
-        await user.save();
-        res.status(200).json({message:"successfully revoked privileges"})
-      }else{
-        res.status(404).json({message:"user not found"})
-      }
-    }catch (err) {
-      console.log(err);
-      res.status(500).json({ message: "Server error" });
-    }
-})
-
-//route for giving admin privileges
-router.put("/giveAdmin",verifyToken, async (req,res)=>{
-    try{
-      const userId = req.body.userId;
-      const user = await User.findOne({ _id:userId });
-      if(user){
-        user.isAdmin = true;
-        await user.save();
-        res.status(200).json({message:"successfully given admin privileges"})
-      }else{
-        res.status(404).json({message:"user not found"})
-      }
-    }catch (err) {
-      console.log(err);
-      res.status(500).json({ message: "Server error" });
-    }
-})
 
 //route to save analysis
 router.post('/saveAnalysis', verifyToken, async (req, res) => {
@@ -369,7 +344,7 @@ router.get('/analysis/:id', verifyToken, async (req, res) => {
   }
 });
 
-//route to change 
+//route to change password
 router.put('/changePassword', verifyToken, async (req, res)=>{
   const{oldPassword, newPassword} = req.body;
   try {

@@ -199,8 +199,18 @@ router.post('/register',async (req,res)=>{
  //route for returning all users
 router.get('/getAllUsers', verifyToken, async (req, res) => {
     try {
-        const users = await User.find({}, '-password'); // exclude password
-        res.status(200).json({ users });
+        // Populate uploadedFiles and savedAnalyses for each user
+        const users = await User.find({}, '-password')
+            .populate('uploadedFiles')
+            .populate('savedAnalyses');
+        // For each user, add counts for files and analyses
+        const usersWithCounts = users.map(user => ({
+            _id: user._id,
+            name: user.name,
+            filesUploaded: user.uploadedFiles ? user.uploadedFiles.length : 0,
+            analysesMade: user.savedAnalyses ? user.savedAnalyses.length : 0,
+        }));
+        res.status(200).json({ users: usersWithCounts });
     } catch (err) {
         console.error('Error fetching users:', err);
         res.status(500).json({ message: 'Server error' });

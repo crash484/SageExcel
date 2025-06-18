@@ -40,10 +40,6 @@ const AdminDashboard = () => {
         fetchUsers();
     }, [token, navigate]);
 
-
-
-
-
     if (loading) return <div className="text-center mt-10 text-lg text-gray-600 dark:text-gray-300">Loading users...</div>;
 
     return (
@@ -59,6 +55,7 @@ const AdminDashboard = () => {
                             <th className="px-4 py-3">Username</th>
                             <th className="px-4 py-3">Files Uploaded</th>
                             <th className="px-4 py-3">Admin Status</th>
+                            <th className="px-4 py-3">Analyses Made</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,6 +83,9 @@ const AdminDashboard = () => {
                                             <FaUserAlt /> User
                                         </span>
                                     )}
+                                </td>
+                                <td className="px-4 py-3 text-blue-600 dark:text-blue-300 font-semibold">
+                                    {user.analysesMade || 0}
                                 </td>
                             </motion.tr>
                         ))}

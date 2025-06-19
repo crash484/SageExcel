@@ -62,10 +62,14 @@ export default function LoginPage() {
             if (response.ok) {
                 // Set credentials with correct user object and token
                 dispatch(setCredentials({
-                    user: { name: data.name },
+                    user: { name: data.name, isAdmin: data.isAdmin },
                     token: data.token
                 }));
-                navigate('/dashboard');
+                if (data.isAdmin) {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
                 toast.success('Login successful!');
             } else {
                 toast.error(data.message || 'Login failed');

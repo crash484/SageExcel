@@ -68,7 +68,12 @@ router.post('/register',async (req,res)=>{
 
             if(err) console.log(err);
 
-            res.status(201).json({token,name:`${user.name}`,message:"successfully logged in"});
+            res.status(201).json({
+              token,
+              name: `${user.name}`,
+              isAdmin: user.isAdmin,
+              message: "successfully logged in"
+            });
             return;
           })
       }
@@ -207,6 +212,7 @@ router.get('/getAllUsers', verifyToken, async (req, res) => {
         const usersWithCounts = users.map(user => ({
             _id: user._id,
             name: user.name,
+            isAdmin: user.isAdmin,
             filesUploaded: user.uploadedFiles ? user.uploadedFiles.length : 0,
             analysesMade: user.savedAnalyses ? user.savedAnalyses.length : 0,
         }));

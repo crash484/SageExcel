@@ -38,6 +38,7 @@ const AdminDashboard = () => {
         };
 
         fetchUsers();
+        console.log(users);
     }, [token, navigate]);
 
     if (loading) return <div className="text-center mt-10 text-lg text-gray-600 dark:text-gray-300">Loading users...</div>;
@@ -71,7 +72,7 @@ const AdminDashboard = () => {
                                     {user.name || user.username || user.email}
                                 </td>
                                 <td className="px-4 py-3 text-indigo-600 dark:text-indigo-400 font-semibold">
-                                    {user.uploadedFiles?.length || 0}
+                                    {user.filesUploaded || 0}
                                 </td>
                                 <td className="px-4 py-3">
                                     {user.isAdmin ? (

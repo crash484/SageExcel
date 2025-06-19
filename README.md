@@ -33,18 +33,18 @@ Backend (Optional): Node.js + Express + MongoDB (assumed for user, file, chart d
 Excel Parsing: xlsx.js or SheetJS
 
 💻 Getting Started
-1. Clone the repository
-git clone https://github.com/your-username/sageexcel.git
+1. Clone the repository<br/>
+git clone https://github.com/your-username/sageexcel.git <br/>
 cd sageexcel
 
-2. Install dependencies
-pnpm install \n
+2. Install dependencies<br/>
+pnpm install <br/>
 npm install
 
-3. Create .env file
-VITE_GEMINI_API_KEY=your_google_gemini_key
+3. Create .env file<br/>
+VITE_GEMINI_API_KEY=your_google_gemini_key <br/>
 REACT_APP_BACKEND_URL=http://localhost:5000
 
-4. Run the development server
-pnpm dev
+4. Run the development server<br/>
+pnpm dev <br/>
 npm run dev

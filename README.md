@@ -34,16 +34,11 @@ Excel Parsing: xlsx.js or SheetJS
 
 💻 Getting Started
 1. Clone the repository
-bash
-Copy
-Edit
 git clone https://github.com/your-username/sageexcel.git
 cd sageexcel
-2. Install dependencies
 
-bash
+2. Install dependencies
 pnpm install
-# or
 npm install
 
 3. Create .env file
@@ -52,5 +47,4 @@ REACT_APP_BACKEND_URL=http://localhost:5000
 
 4. Run the development server
 pnpm dev
-# or
 npm run dev

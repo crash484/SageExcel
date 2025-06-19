@@ -38,7 +38,7 @@ git clone https://github.com/your-username/sageexcel.git
 cd sageexcel
 
 2. Install dependencies
-pnpm install
+pnpm install \n
 npm install
 
 3. Create .env file

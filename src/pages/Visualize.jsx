@@ -542,6 +542,12 @@ export default function Visualize() {
                                     </button>
                                 </div>
                                 <button
+                                        onClick={handleGeminiAnalysis}
+                                        className="w-full mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                >
+                                        🤖 Analyze with Gemini
+                                </button>
+                                <button
                                     onClick={handleSaveAnalysis}
                                     className="w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 mt-2"
                                 >
@@ -552,12 +558,6 @@ export default function Visualize() {
                                     <FiRefreshCw className="inline mr-1" /> Reset
                                 </button>
                             </div>
-                            <button
-                                onClick={handleGeminiAnalysis}
-                                className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                                >
-                                🤖 Analyze with Gemini
-                                </button>
                         </motion.div>
 
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}

@@ -1,18 +1,22 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import DashboardLayout from './components/Layout/DashboardLayout'
-import Dashboard from './pages/Dashboard'
-import Login from './components/Auth/Login'
-import Register from './components/Auth/Register'
+import { useSelector } from 'react-redux';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import DashboardLayout from './components/Layout/DashboardLayout';
+import Dashboard from './pages/Dashboard';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 import Upload from './pages/Upload';
 import History from './pages/History';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Visualize from './pages/Visualize';
-import LandingPage from './pages/LandingPage'
-import AdminDashboard from './pages/AdminDashboard'
-import { Toaster } from 'react-hot-toast'
+import LandingPage from './pages/LandingPage';
+import AdminDashboard from './pages/AdminDashboard';
+import { Toaster } from 'react-hot-toast';
+import Charts from './pages/Charts';
+import ChartViewer from './pages/ChartViewer';
+import ChangePassword from './pages/ChangePassword';
+import AdminDashboardLayout from './components/Layout/AdminDashboardLayout';
 
 function App() {
     const { token } = useSelector((state) => state.auth)
@@ -48,12 +52,21 @@ function App() {
                     <Route path="history" element={<History />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
-                    <Route path="admin" element={<AdminDashboard />} />
+                    <Route path="charts" element={<Charts />} />
+                    <Route path="/chart/:chartId" element={<ChartViewer />} />
+                    <Route path="change-password" element={<ChangePassword />} />
                     {/* Add other protected routes here */}
                 </Route>
 
                 {/* Fallback route */}
                 <Route path="*" element={<Navigate to="/" replace />} />
+                <Route
+                    path="/"
+                    element={DEV_BYPASS_AUTH || token ? <AdminDashboardLayout /> : <Navigate to="/landing" replace />}
+                >
+                    <Route path="admin" element={<AdminDashboard />} />
+
+                </Route>
             </Routes>
         </BrowserRouter>
     )

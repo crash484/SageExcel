@@ -27,7 +27,13 @@ const uploadedFileSchema = new mongoose.Schema({
     data: {
         type: Buffer,
         required: true
-    }
+    },
+        analyses: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Analysis"
+        }
+    ]
 })
 
 const UploadedFile = mongoose.model('UploadedFile',uploadedFileSchema);

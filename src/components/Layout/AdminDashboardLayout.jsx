@@ -4,11 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
-const DashboardLayout = () => {
+const AdminDashboardLayout = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const dropdownRef = useRef(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -30,31 +28,11 @@ const DashboardLayout = () => {
         navigate('/login');
     };
 
-    const navLinkClass = ({ isActive }) =>
-        isActive
-            ? 'relative text-indigo-100 dark:text-indigo-400 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-white dark:after:bg-indigo-400'
-            : 'text-gray-300 hover:text-white dark:hover:text-indigo-200 relative transition-colors duration-200';
-
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 bg-[url('/pattern.svg')] bg-top bg-fixed">
             <nav className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 shadow-lg fixed top-0 left-0 right-0 z-30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <button
-                            className="sm:hidden text-white mr-4"
-                            onClick={() => setIsMobileMenuOpen(true)}
-                        >
-                            <Bars3Icon className="h-6 w-6" />
-                        </button>
-                        <h1 className="text-xl font-bold text-white">SageExcel</h1>
-                        <div className="hidden sm:flex sm:space-x-8 ml-6">
-                            <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
-                            <NavLink to="/upload" className={navLinkClass}>Upload</NavLink>
-                            <NavLink to="/history" className={navLinkClass}>History</NavLink>
-                            <NavLink to="/charts" className = {navLinkClass}>Charts</NavLink>
-                        </div>
-                    </div>
-
+                    <h1 className="text-xl font-bold text-white">Admin Panel</h1>
                     <div className="flex items-center gap-4">
                         <div className="group relative" ref={dropdownRef}>
                             <button
@@ -78,8 +56,8 @@ const DashboardLayout = () => {
                                         exit={{ opacity: 0, y: -10 }}
                                         className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-50"
                                     >
-                                        <NavLink to="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Your Profile</NavLink>
-                                        <NavLink to="/settings" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Settings</NavLink>
+                                        {/* <NavLink to="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Your Profile</NavLink> */}
+                                        {/* <NavLink to="/settings" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Settings</NavLink> */}
                                         <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Sign out</button>
                                     </motion.div>
                                 )}
@@ -88,30 +66,6 @@ const DashboardLayout = () => {
                     </div>
                 </div>
             </nav>
-
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.aside
-                        initial={{ x: '-100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '-100%' }}
-                        transition={{ duration: 0.3 }}
-                        className="fixed top-0 left-0 z-40 w-64 h-full bg-white dark:bg-gray-800 shadow-lg p-4"
-                    >
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">Menu</h2>
-                            <button onClick={() => setIsMobileMenuOpen(false)}>
-                                <XMarkIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                            </button>
-                        </div>
-                        <nav className="flex flex-col space-y-4">
-                            <NavLink to="/dashboard" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink>
-                            <NavLink to="/upload" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}>Upload</NavLink>
-                            <NavLink to="/history" className={navLinkClass} onClick={() => setIsMobileMenuOpen(false)}>History</NavLink>
-                        </nav>
-                    </motion.aside>
-                )}
-            </AnimatePresence>
 
             <main className="pt-20">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -130,4 +84,4 @@ const DashboardLayout = () => {
     );
 };
 
-export default DashboardLayout;
+export default AdminDashboardLayout;

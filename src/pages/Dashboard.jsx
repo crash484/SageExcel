@@ -7,50 +7,60 @@ import { FaFileAlt, FaChartBar, FaSave } from 'react-icons/fa';
 
 const Dashboard = () => {
     const token = useSelector(selectCurrentToken);
-    const [fileCount,setFileCount]=useState(0);
-    const [file,setFile] = useState([{
-        "filename":"",
-        "date":""
-    }])
+    const [file, setFile] = useState([]);
+    const [analysis, setAnalysis] = useState([]);
 
     useEffect(() => {
-        const getInfo=(async () => {
+        const getInfo = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/getFiles', {
+            const response = await fetch('http://localhost:5000/api/auth/getData', {
                 method: 'GET',
-                headers: { 
-                    'Authorization': `Bearer ${token}`
-                 }
+                headers: {
+                'Authorization': `Bearer ${token}`
+                }
             });
             const data = await response.json();
-            if(response.ok){
-                const user= data.user;
-                const allFiles = user.uploadedFiles;
-                const fileData = allFiles.map(file =>({
-                    filename: file.filename,
-                    date: file.date
-                }))
-                setFile(fileData);
+
+            if (response.ok) {
+                // Directly set files and analyses
+                setFile(data.files || []);
+                setAnalysis(data.analyses || []);
+            } else {
+                console.error('Fetch error:', data.message);
             }
             } catch (error) {
-                console.error(error);
+            console.error('Error fetching dashboard summary:', error);
             }
-        });
+        };
+
         getInfo();
+        }, [token]);
 
-    }, [token]);
+        const formatDate = (date) =>
+        new Date(date).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
 
-    const stats = [
-        { icon: <FaFileAlt />, label: 'Files Uploaded', value: file.length },
-        { icon: <FaChartBar />, label: 'Analyses Performed', value: 12 },
-        { icon: <FaSave />, label: 'Saved Charts', value: 8 },
-    ];
+            const stats = [
+            { icon: <FaFileAlt />, label: 'Files Uploaded', value: file.length },
+            { icon: <FaChartBar />, label: 'Analyses Performed', value: analysis.length },
+            { icon: <FaSave />, label: 'Saved Charts', value: analysis.length }, // same here
+            ];
 
-        const activities = file.slice(-3).reverse().map(f => ({
-            action: `Uploaded ${f.filename}`,
-            time: new Date(f.date).toLocaleString(),
-        }));
-    
+            const activities = [
+            ...file.slice(-2).reverse().map(f => ({
+                action: `Uploaded ${f.filename}`,
+                time: formatDate(f.date),
+            })),
+            ...analysis.slice(-1).reverse().map(a => ({
+                action: `Saved chart "${a.chartTitle}" for ${a.fileName}`,
+                time: formatDate(a.createdAt),
+            }))
+            ];
 
     return (
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">

@@ -14,7 +14,7 @@ const Profile = () => {
     useEffect(()=>{
         (async () => {
             try {
-                const response = await fetch('http://locahost:7860/api/auth/getUser',{
+                const response = await fetch('https://crash03-InternshipProjectBackend.hf.space/api/auth/getUser',{
                     method:'GET',
                     headers:{
                         'Authorization':`Bearer ${token}`

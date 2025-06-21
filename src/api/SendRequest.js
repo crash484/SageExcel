@@ -2,7 +2,7 @@
 const SendRequest = async (token)=>{
     try {
             // Your async code here
-                const response = await fetch('http://localhost:7860/api/auth/verify', {
+                const response = await fetch('https://crash03-InternshipProjectBackend.hf.space/api/auth/verify', {
                     method: 'POST',
                     headers:{
                     'Content-Type': 'application/json',

@@ -48,7 +48,7 @@ export default function Visualize() {
     useEffect(() => {
         const getFile = async () => {
             try {
-                const url = `http://locahost:7860/api/auth/preview/${fileId}`;
+                const url = `https://crash03-InternshipProjectBackend.hf.space/api/auth/preview/${fileId}`;
                 const response = await fetch(url, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -336,7 +336,7 @@ export default function Visualize() {
         };
 
         try {
-            const response = await fetch("http://locahost:7860/api/auth/saveAnalysis", {
+            const response = await fetch("https://crash03-InternshipProjectBackend.hf.space/api/auth/saveAnalysis", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

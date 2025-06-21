@@ -138,7 +138,7 @@ export default function Upload() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('http://locahost:7860/api/auth/upload', {
+            const response = await fetch('https://crash03-InternshipProjectBackend.hf.space/api/auth/upload', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

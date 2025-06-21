@@ -13,7 +13,7 @@ const Dashboard = () => {
     useEffect(() => {
         const getInfo = async () => {
             try {
-            const response = await fetch('http://locahost:7860/api/auth/getData', {
+            const response = await fetch('https://crash03-InternshipProjectBackend.hf.space/api/auth/getData', {
                 method: 'GET',
                 headers: {
                 'Authorization': `Bearer ${token}`

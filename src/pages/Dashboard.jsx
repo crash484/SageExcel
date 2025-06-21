@@ -13,7 +13,7 @@ const Dashboard = () => {
     useEffect(() => {
         const getInfo = async () => {
             try {
-            const response = await fetch('http://localhost:5000/api/auth/getData', {
+            const response = await fetch('http://locahost:7860/api/auth/getData', {
                 method: 'GET',
                 headers: {
                 'Authorization': `Bearer ${token}`

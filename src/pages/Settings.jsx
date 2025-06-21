@@ -15,7 +15,7 @@ const Settings = () => {
             if (!token) return;
 
             try {
-                const response = await fetch('http://localhost:5000/api/auth/getUser', {
+                const response = await fetch('http://locahost:7860/api/auth/getUser', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

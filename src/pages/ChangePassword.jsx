@@ -27,7 +27,7 @@ const ChangePassword = () => {
         return;    
     }
     try {
-      const res = await fetch('http://localhost:5000/api/auth/changePassword', {
+      const res = await fetch('http://locahost:7860/api/auth/changePassword', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

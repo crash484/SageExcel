@@ -17,7 +17,7 @@ const ChartViewer = () => {
   useEffect(() => {
     const fetchChart = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/auth/analysis/${chartId}`, {
+        const response = await fetch(`http://locahost:7860/api/auth/analysis/${chartId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await response.json();
@@ -35,7 +35,7 @@ const ChartViewer = () => {
 
     const fetchFileAndExtractData = async (fileId, selectedFields) => {
       try {
-        const res = await fetch(`http://localhost:5000/api/auth/preview/${fileId}`, {
+        const res = await fetch(`http://locahost:7860/api/auth/preview/${fileId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const blob = await res.blob();

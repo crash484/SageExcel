@@ -6,7 +6,7 @@ import cors from "cors"
 
 dotenv.config();
 const app = express();
-const port = process.env.PORT;
+const port = 7860;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

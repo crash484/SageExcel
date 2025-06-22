@@ -14,7 +14,7 @@ const Profile = () => {
     useEffect(()=>{
         (async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/getUser',{
+                const response = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/getUser',{
                     method:'GET',
                     headers:{
                         'Authorization':`Bearer ${token}`

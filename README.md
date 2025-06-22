@@ -34,17 +34,25 @@ Excel Parsing: xlsx.js or SheetJS
 
 💻 Getting Started
 1. Clone the repository<br/>
-git clone https://github.com/your-username/sageexcel.git <br/>
+```bash
+git clone https://github.com/your-username/sageexcel.git 
 cd sageexcel
+```
 
 2. Install dependencies<br/>
-pnpm install <br/>
+```bash
+pnpm install 
 npm install
+```
 
 3. Create .env file<br/>
-VITE_GEMINI_API_KEY=your_google_gemini_key <br/>
+```bash
+VITE_GEMINI_API_KEY=your_google_gemini_key 
 REACT_APP_BACKEND_URL=http://localhost:5000
+```
 
 4. Run the development server<br/>
-pnpm dev <br/>
+```bash
+pnpm dev
 npm run dev
+```

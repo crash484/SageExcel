@@ -18,7 +18,7 @@ const Charts = () => {
     useEffect(() => {
         const fetchVisuals = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/auth/getAnalysis', {
+                const response = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/getAnalysis', {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -43,7 +43,7 @@ const Charts = () => {
 
     const handleDelete = async (id) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/auth/analysis/${id}`, {
+            const response = await fetch(`https://sageexcelbackend-production.up.railway.app/api/auth/analysis/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${token}`

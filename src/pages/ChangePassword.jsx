@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { selectCurrentToken } from '../store/authSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCurrentToken, logout } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 const ChangePassword = () => {
   const token = useSelector(selectCurrentToken);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [oldPassword, setOldPassword] = useState('');
@@ -27,7 +28,7 @@ const ChangePassword = () => {
         return;    
     }
     try {
-      const res = await fetch('http://localhost:5000/api/auth/changePassword', {
+      const res = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/changePassword', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -37,13 +38,22 @@ const ChangePassword = () => {
       });
 
       const data = await res.json();
-      if (!res.ok) return setError(data.message || 'Something went wrong.');
-
+      if (!res.ok){
+        toast.error('password not changed successfully');
+      }else{
       toast.success('Password changed successfully!');
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      // Log out and redirect to login
+      setTimeout(() => {
+        dispatch(logout());
+        toast('Please log in again with your new password.');
+        navigate('/login');
+      }, 1200);
+    }
     } catch (err) {
+      console.log(err);
       toast.error('Server error. Please try again.');
     }
   };

@@ -46,10 +46,7 @@ export default function RegisterPage() {
             return;
         }
 
-        if (!isValidPassword(password)) {
-            toast.error('Password must be at least 8 characters, include uppercase, lowercase, number, and special character');
-            return;
-        }
+        
 
         if (password !== confirmPassword) {
             toast.error('Passwords do not match');
@@ -63,7 +60,7 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/register', {
+            const response = await fetch('http://localhost:5000/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: url.toString(),

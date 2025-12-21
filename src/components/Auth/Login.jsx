@@ -21,7 +21,7 @@ export default function LoginPage() {
     if (!window.google) return;
 
     window.google.accounts.id.initialize({
-      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: handleGoogleLogin,
     });
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async (response) => {
     try {
-      const res = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/googleVerify', {
+      const res = await fetch('http://localhost:5000/api/auth/googleVerify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: response.credential }),
@@ -52,17 +52,17 @@ export default function LoginPage() {
       }
 
       // Existing user -> LOGIN
-      if (data.type === 'LOGIN') {
+      if (data.success) {
         dispatch(setCredentials(data));
         toast.success('Logged in successfully');
         navigate('/dashboard');
         return;
-      }
+        }
 
-      // New user -> REGISTER
-      if (data.type === 'REGISTER') {
+        // ✅ New user -> REGISTER
+        if (data.needsRegistration) {
         navigate('/set-password', { state: data });
-      }
+        }
 
     } catch (err) {
       toast.error(err.message);

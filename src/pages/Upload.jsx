@@ -138,7 +138,7 @@ export default function Upload() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/upload', {
+            const response = await fetch('http://localhost:5000/api/auth/upload', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

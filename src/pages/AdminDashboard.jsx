@@ -15,7 +15,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/getAllUsers', {
+                const response = await fetch('http://localhost:5000/api/auth/getAllUsers', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`

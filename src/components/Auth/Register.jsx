@@ -10,7 +10,8 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 
 /* ---------- password rule ---------- */
 const isValidPassword = (password) =>
-  /^(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z\d]).{8,}$/.test(password);
+  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])(?=\S+$).{8,}$/.test(password);
+
 
 export default function RegisterPage() {
   const [googleUser, setGoogleUser] = useState(null);

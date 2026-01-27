@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async (response) => {
     try {
-      const res = await fetch('http://13.201.191.230:5000/api/auth/googleVerify', {
+      const res = await fetch('https://api.shashwhat.me/api/auth/googleVerify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: response.credential }),
@@ -81,7 +81,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://13.201.191.230:5000/api/auth/login', {
+      const res = await fetch('https://api.shashwhat.me/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

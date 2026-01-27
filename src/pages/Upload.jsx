@@ -138,7 +138,7 @@ export default function Upload() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('http://13.201.191.230:5000/api/auth/upload', {
+            const response = await fetch('https://api.shashwhat.me/api/auth/upload', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -15,7 +15,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://13.201.191.230:5000/api/auth/getAllUsers', {
+                const response = await fetch('https://api.shashwhat.me/api/auth/getAllUsers', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`

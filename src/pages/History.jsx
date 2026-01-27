@@ -24,7 +24,7 @@ export default function History() {
         const fetchData = async () => {
             try {
                     setIsLoading(true);
-                    const response = await fetch('http://localhost:5000/api/auth/getFiles', {
+                    const response = await fetch('http://13.201.191.230:5000/api/auth/getFiles', {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -59,7 +59,7 @@ export default function History() {
 
 
         try {
-            const response = await fetch(`http://localhost:5000/api/auth/download/${fileId}`, {
+            const response = await fetch(`http://13.201.191.230:5000/api/auth/download/${fileId}`, {
                 method: 'GET',
                 headers: {
                     Authorization: `Bearer ${token}`

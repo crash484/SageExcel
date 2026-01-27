@@ -22,7 +22,7 @@ export default function GoogleLoginButton(){
     },[])
     
     const handleGoogleLogin = async()=>{
-        await fetch("api/auth/google",{
+        await fetch("http://13.201.191.230:5000/api/auth/google",{
             method:"POST",
             headers:{ "Content-type":"application/json"},
             body: JSON.stringify({token:response.credential})

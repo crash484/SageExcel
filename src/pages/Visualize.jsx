@@ -48,7 +48,7 @@ export default function Visualize() {
     useEffect(() => {
         const getFile = async () => {
             try {
-                const url = `http://localhost:5000/api/auth/preview/${fileId}`;
+                const url = `http://13.201.191.230:5000/api/auth/preview/${fileId}`;
                 const response = await fetch(url, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -336,7 +336,7 @@ export default function Visualize() {
         };
 
         try {
-            const response = await fetch("http://localhost:5000/api/auth/saveAnalysis", {
+            const response = await fetch("http://13.201.191.230:5000/api/auth/saveAnalysis", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

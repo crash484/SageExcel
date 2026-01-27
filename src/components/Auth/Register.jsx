@@ -55,7 +55,7 @@ export default function RegisterPage() {
   const handleGoogleRegister = async (response) => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/auth/googleVerify",
+        "http://13.201.191.230:5000/api/auth/googleVerify",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -122,7 +122,7 @@ export default function RegisterPage() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/auth/googleRegister",
+        "http://13.201.191.230:5000/api/auth/googleRegister",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

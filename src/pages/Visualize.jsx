@@ -334,7 +334,6 @@ export default function Visualize() {
             zAxis,  // ✅ <-- include zAxis explicitly
             colorTheme: "default"
         };
-
         try {
             const response = await fetch("https://api.shashwhat.me/api/auth/saveAnalysis", {
                 method: "POST",

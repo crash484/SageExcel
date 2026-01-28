@@ -98,7 +98,9 @@ export default function LoginPage() {
       navigate('/dashboard');
 
     } catch (err) {
-      toast.error(err.message);
+      console.log(err.message)
+      if(err.message==="Failed to fetch")
+      toast.error("Server is down");
     } finally {
       setIsLoading(false);
     }

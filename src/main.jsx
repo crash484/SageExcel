@@ -25,6 +25,11 @@ mediaQuery.addEventListener('change', (e) => {
 ReactDOM.createRoot(document.getElementById('app')).render(
     <React.StrictMode>
         <Provider store={store}>
+            <script
+          src="https://accounts.google.com/gsi/client"
+          async
+          defer
+        ></script>
             <App />
         </Provider>
     </React.StrictMode>

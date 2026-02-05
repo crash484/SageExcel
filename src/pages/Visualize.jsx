@@ -48,7 +48,7 @@ export default function Visualize() {
     useEffect(() => {
         const getFile = async () => {
             try {
-                const url = `https://sageexcelbackend-production.up.railway.app/api/auth/preview/${fileId}`;
+                const url = `https://api.shashwhat.me/api/auth/preview/${fileId}`;
                 const response = await fetch(url, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -334,9 +334,8 @@ export default function Visualize() {
             zAxis,  // ✅ <-- include zAxis explicitly
             colorTheme: "default"
         };
-
         try {
-            const response = await fetch("https://sageexcelbackend-production.up.railway.app/api/auth/saveAnalysis", {
+            const response = await fetch("https://api.shashwhat.me/api/auth/saveAnalysis", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

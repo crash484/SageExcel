@@ -2,7 +2,7 @@
 const SendRequest = async (token)=>{
     try {
             // Your async code here
-                const response = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/verify', {
+                const response = await fetch('https://api.shashwhat.me/api/auth/verify', {
                     method: 'POST',
                     headers:{
                     'Content-Type': 'application/json',

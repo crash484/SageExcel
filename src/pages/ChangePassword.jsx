@@ -28,7 +28,7 @@ const ChangePassword = () => {
         return;    
     }
     try {
-      const res = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/changePassword', {
+      const res = await fetch('https://api.shashwhat.me/api/auth/changePassword', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

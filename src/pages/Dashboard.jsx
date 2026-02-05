@@ -13,7 +13,7 @@ const Dashboard = () => {
     useEffect(() => {
         const getInfo = async () => {
             try {
-            const response = await fetch('https://sageexcelbackend-production.up.railway.app/api/auth/getData', {
+            const response = await fetch('https://api.shashwhat.me/api/auth/getData', {
                 method: 'GET',
                 headers: {
                 'Authorization': `Bearer ${token}`
